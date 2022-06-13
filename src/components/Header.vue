@@ -19,6 +19,7 @@ export default defineComponent({
   text-align: center;
   font-size: 30px;
   border-bottom: solid;
+  border-bottom-color: darkgrey;
   height: 60px;
   justify-content: center;
   align-items: center;

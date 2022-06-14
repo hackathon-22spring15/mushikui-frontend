@@ -1,67 +1,71 @@
-<script>
-const zeroPadding=(num,digit)=>{
-  return (Array(digit).join("0")+num).slice(-digit)
-}
-export default {
-  props: {
-    show: Boolean
-  },
-  data(){
-    return {
-      date: new Date(),
-    }
-  },
-  computed:{
-    hours() {
-      return zeroPadding(23-this.date.getHours(), 2)
-    },
-    minutes() {
-      return zeroPadding(59-this.date.getMinutes(), 2)
-    },
-    seconds() {
-      return zeroPadding(59-this.date.getSeconds(), 2)
-    },
-  },
-  mounted() {
-    this.setDate()
-    setInterval(() => this.setDate(), 1000)
-  },
-  methods: {
-    setDate() {
-      this.date = new Date()
-    },
-  },
-}
-</script>
 <template>
   <Transition name="modal">
     <div v-if="show" class="modal-mask">
       <div class="modal-wrapper">
         <div class="modal-container">
           <div class="modal-header">
-            <button
-              class="modal-default-button"
-              @click="$emit('close')"
-            >x</button>
+            <button class="modal-default-button" @click="$emit('close')">
+              x
+            </button>
           </div>
-
           <div class="modal-body">
             <div name="body">次の問題まで</div>
-            <div class="timer">
-              {{hours}}:{{minutes}}:{{seconds}}
-            </div>
+            <div class="timer">{{ hours }}:{{ minutes }}:{{ seconds }}</div>
           </div>
-
           <div class="modal-footer">
-            <div name="footer">
-              
-            </div>
+            <div name="footer"></div>
           </div>
         </div>
       </div>
     </div>
   </Transition>
 </template>
+
+<script lang="ts">
+import { computed, defineComponent, onMounted, ref } from "vue";
+
+const zeroPadding = (num: number, digit: number) => {
+  return (Array(digit).join("0") + num).slice(-digit);
+};
+
+export default defineComponent({
+  name: "modal",
+  props: {
+    show: {
+      type: Boolean,
+      default: false
+    }
+  },
+  setup() {
+    const date = ref(new Date());
+
+    const hours = computed(() => {
+      return zeroPadding(23 - date.value.getHours(), 2);
+    });
+    const minutes = computed(() => {
+      return zeroPadding(59 - date.value.getMinutes(), 2);
+    });
+    const seconds = computed(() => {
+      return zeroPadding(59 - date.value.getSeconds(), 2);
+    });
+
+    const setDate = () => {
+      date.value = new Date();
+    };
+
+    onMounted(() => {
+      setDate();
+      setInterval(setDate, 1000);
+    });
+
+    return {
+      hours,
+      minutes,
+      seconds
+    };
+  }
+});
+</script>
 
 <style scoped>
 .modal-mask {
@@ -126,5 +130,4 @@ export default {
   -webkit-transform: scale(1.1);
   transform: scale(1.1);
 }
-
 </style>

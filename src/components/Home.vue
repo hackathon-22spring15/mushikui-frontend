@@ -106,6 +106,12 @@ export default defineComponent({
             <Key char="8" :input="input"></Key>
             <Key char="9" :input="input"></Key>
         </div>
+        <div class="operator">
+            <Key char="+" :input="input"></Key>
+            <Key char="-" :input="input"></Key>
+            <Key char="*" :input="input"></Key>
+            <Key char="/" :input="input"></Key>
+        </div>
         <div class="special">
             <Key char="delete" :input="input"></Key>
             <Key char="return" :input="input"></Key>
@@ -175,6 +181,17 @@ export default defineComponent({
     margin-top: 30px;
     width: 400px;
     height: 100px;
+    margin-inline: auto;
+}
+.operator {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-gap: 5px;
+    /* center */
+    justify-content: center;
+    margin-top: 30px;
+    width: 400px;
+    height: 50px;
     margin-inline: auto;
 }
 

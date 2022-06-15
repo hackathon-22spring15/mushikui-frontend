@@ -3,8 +3,8 @@ import { defineComponent, ref } from 'vue'
 import Key from "./Key.vue"
 
 const answer = ref<string>("")
-const current_row = ref(0)
-const idx = ref(0)
+const row_idx = ref(0)
+const col_idx = ref(0)
 const lines = ref(
     [
         {
@@ -34,39 +34,39 @@ const RIGHT_LEN = 3
 const LEFT_LEN = 3
 
 function input(char: string) {
-    console.log(idx.value)
+    console.log(col_idx.value)
     if (char == "delete") {
-        if (idx.value == 0){
+        if (col_idx.value == 0){
             console.log("empty")
             return
         }
-        if ((idx.value - 1) > (LEFT_LEN - 1)) {
-            lines.value[current_row.value].right[idx.value - (RIGHT_LEN + 1)] = ""
+        if ((col_idx.value - 1) > (LEFT_LEN - 1)) {
+            lines.value[row_idx.value].right[col_idx.value - (RIGHT_LEN + 1)] = ""
         } else {
-            lines.value[current_row.value].left[idx.value - 1] = ""
+            lines.value[row_idx.value].left[col_idx.value - 1] = ""
         }
-        idx.value--
+        col_idx.value--
     } else if (char == "return") {
-        console.log(idx.value)
-        if (idx.value != (LEFT_LEN + RIGHT_LEN)){
+        console.log(col_idx.value)
+        if (col_idx.value != (LEFT_LEN + RIGHT_LEN)){
             alert("not inputed all")
             return 
         } 
         alert("judge")
         
-        current_row.value++;
-        // judge(lines.value[current_row.value])
+        row_idx.value++;
+        // judge(lines.value[row_idx.value])
         
-        idx.value = 0;
-    } else if (idx.value > (LEFT_LEN + RIGHT_LEN - 1)) {
+        col_idx.value = 0;
+    } else if (col_idx.value > (LEFT_LEN + RIGHT_LEN - 1)) {
         console.log("skip")
     } else {
-        if (idx.value > (LEFT_LEN - 1)) {
-            lines.value[current_row.value].right[idx.value - LEFT_LEN] = char
+        if (col_idx.value > (LEFT_LEN - 1)) {
+            lines.value[row_idx.value].right[col_idx.value - LEFT_LEN] = char
         } else {
-            lines.value[current_row.value].left[idx.value] = char
+            lines.value[row_idx.value].left[col_idx.value] = char
         }
-        idx.value++
+        col_idx.value++
     }
 }
 
@@ -93,8 +93,8 @@ export default defineComponent({
         </div>
     </div>
 
-    <div class="KeyBoard">
-        <div class="normal">
+    <div class="keyboard">
+        <div class="numbers">
             <Key char="0" :input="input"></Key>
             <Key char="1" :input="input"></Key>
             <Key char="2" :input="input"></Key>
@@ -172,7 +172,7 @@ export default defineComponent({
     user-select: none;
 }
 
-.normal {
+.numbers {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     grid-gap: 5px;

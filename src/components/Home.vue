@@ -50,20 +50,20 @@ export default defineComponent({
 
         const isCollect = computed(
             () => {
-                return results.value.map(result => result.map(e => e == "o"))
+                return results.value.map(result => result.map(e => e === "o"))
             }
         )
 
         const isHalfCollect = computed(
             () => {
-                return results.value.map(result => result.map(e => e == "h"))
+                return results.value.map(result => result.map(e => e === "h"))
             }
         )
 
 
         const isnotCollect = computed(
             () => {
-                return results.value.map(result => result.map(e => e == "x"))
+                return results.value.map(result => result.map(e => e === "x"))
             }
         )
 
@@ -73,8 +73,8 @@ export default defineComponent({
         }
 
         function update(char: string) {
-            if (char == "delete") {
-                if (col_idx.value == 0) {
+            if (char === "delete") {
+                if (col_idx.value === 0) {
                     return
                 }
                 if ((col_idx.value - 1) > (LEFT_LEN - 1)) {
@@ -83,8 +83,8 @@ export default defineComponent({
                     lines.value[row_idx.value].left[col_idx.value - 1] = ""
                 }
                 col_idx.value--
-            } else if (char == "return") {
-                if (col_idx.value != (LEFT_LEN + RIGHT_LEN)) {
+            } else if (char === "return") {
+                if (col_idx.value !== (LEFT_LEN + RIGHT_LEN)) {
                     alert("plese input all")
                     return
                 }

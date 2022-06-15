@@ -1,9 +1,11 @@
 <script lang="ts">
+import { defineComponent } from "vue"
 
-export default {
+
+export default defineComponent({
     name: "Key",
     props: ["char", "input"]
-}
+})
 
 
 

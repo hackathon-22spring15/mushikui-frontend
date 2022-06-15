@@ -1,93 +1,131 @@
 <script lang="ts">
-import { defineComponent, ref } from 'vue'
+import { defineComponent, ref, computed } from 'vue'
 import Key from "./Key.vue"
 
-const answer = ref<string>("")
-const row_idx = ref(0)
-const col_idx = ref(0)
-const lines = ref(
-    [
-        {
-            left: ["", "", ""],
-            right: ["", "", ""]
-        },
-        {
-            left: ["", "", ""],
-            right: ["", "", ""]
-        },
-        {
-            left: ["", "", ""],
-            right: ["", "", ""]
-        },
-        {
-            left: ["", "", ""],
-            right: ["", "", ""]
-        },
-        {
-            left: ["", "", ""],
-            right: ["", "", ""]
-        }
-    ]
-)
-
-const RIGHT_LEN = 3
-const LEFT_LEN = 3
-
-function input(char: string) {
-    console.log(col_idx.value)
-    if (char == "delete") {
-        if (col_idx.value == 0){
-            console.log("empty")
-            return
-        }
-        if ((col_idx.value - 1) > (LEFT_LEN - 1)) {
-            lines.value[row_idx.value].right[col_idx.value - (RIGHT_LEN + 1)] = ""
-        } else {
-            lines.value[row_idx.value].left[col_idx.value - 1] = ""
-        }
-        col_idx.value--
-    } else if (char == "return") {
-        console.log(col_idx.value)
-        if (col_idx.value != (LEFT_LEN + RIGHT_LEN)){
-            alert("not inputed all")
-            return 
-        } 
-        alert("judge")
-        
-        row_idx.value++;
-        // judge(lines.value[row_idx.value])
-        
-        col_idx.value = 0;
-    } else if (col_idx.value > (LEFT_LEN + RIGHT_LEN - 1)) {
-        console.log("skip")
-    } else {
-        if (col_idx.value > (LEFT_LEN - 1)) {
-            lines.value[row_idx.value].right[col_idx.value - LEFT_LEN] = char
-        } else {
-            lines.value[row_idx.value].left[col_idx.value] = char
-        }
-        col_idx.value++
-    }
-}
 
 export default defineComponent({
     setup() {
-        return { lines, answer, input }
+
+        const RIGHT_LEN = 3
+        const LEFT_LEN = 3
+
+        const answer = ref("")
+        const row_idx = ref(0)
+        const col_idx = ref(0)
+        const lines = ref(
+            [
+                {
+                    left: ["", "", ""],
+                    right: ["", "", ""]
+                },
+                {
+                    left: ["", "", ""],
+                    right: ["", "", ""]
+                },
+                {
+                    left: ["", "", ""],
+                    right: ["", "", ""]
+                },
+                {
+                    left: ["", "", ""],
+                    right: ["", "", ""]
+                },
+                {
+                    left: ["", "", ""],
+                    right: ["", "", ""]
+                }
+            ]
+        )
+
+
+
+        const results = ref([
+            ["-", "-", "-", "-", "-", "-"],
+            ["-", "-", "-", "-", "-", "-"],
+            ["-", "-", "-", "-", "-", "-"],
+            ["-", "-", "-", "-", "-", "-"],
+            ["-", "-", "-", "-", "-", "-"]
+
+        ])
+
+        const isCollect = computed(
+            () => {
+                return results.value.map(result => result.map(e => e == "o"))
+            }
+        )
+
+        const isHalfCollect = computed(
+            () => {
+                return results.value.map(result => result.map(e => e == "h"))
+            }
+        )
+
+
+        const isnotCollect = computed(
+            () => {
+                return results.value.map(result => result.map(e => e == "x"))
+            }
+        )
+
+
+        function judge(left: string, right: string) {
+            return ["o", "o", "o", "h", "x", "o"]
+        }
+
+        function update(char: string) {
+            if (char == "delete") {
+                if (col_idx.value == 0) {
+                    return
+                }
+                if ((col_idx.value - 1) > (LEFT_LEN - 1)) {
+                    lines.value[row_idx.value].right[col_idx.value - (RIGHT_LEN + 1)] = ""
+                } else {
+                    lines.value[row_idx.value].left[col_idx.value - 1] = ""
+                }
+                col_idx.value--
+            } else if (char == "return") {
+                if (col_idx.value != (LEFT_LEN + RIGHT_LEN)) {
+                    alert("plese input all")
+                    return
+                }
+                results.value[row_idx.value] = judge(lines.value[row_idx.value].left.join(), lines.value[row_idx.value].right.join())
+                row_idx.value++;
+                col_idx.value = 0;
+            } else if (col_idx.value > (LEFT_LEN + RIGHT_LEN - 1)) {
+                // skip
+                return
+            } else {
+                if (col_idx.value > (LEFT_LEN - 1)) {
+                    lines.value[row_idx.value].right[col_idx.value - LEFT_LEN] = char
+                } else {
+                    lines.value[row_idx.value].left[col_idx.value] = char
+                }
+                col_idx.value++
+            }
+        }
+
+        return { lines, answer, update, results, isCollect, isHalfCollect, isnotCollect }
     },
     components: {
         Key
     }
 })
+
+
 </script>
 
 <template>
     <div class="board">
-        <div class="row" v-for="row in lines">
-            <div class="tile" v-for="element in row.left">
+        <div class="row" v-for="row, i in lines">
+            <div class="tile"
+                v-bind:class="{ correct: isCollect[i][j], half: isHalfCollect[i][j], notcollect: isnotCollect[i][j]}"
+                v-for="element, j in row.left" :key="j">
                 {{ element }}
             </div>
             <div class="equal"> = </div>
-            <div class="tile" v-for="element in row.right">
+            <div class="tile"
+                v-bind:class="{ correct: isCollect[i][j + 3], half: isHalfCollect[i][j + 3], notcollect: isnotCollect[i][j + 3] }"
+                v-for="element, j in row.right" :key="j">
                 {{ element }}
             </div>
         </div>
@@ -95,26 +133,26 @@ export default defineComponent({
 
     <div class="keyboard">
         <div class="numbers">
-            <Key char="0" :input="input"></Key>
-            <Key char="1" :input="input"></Key>
-            <Key char="2" :input="input"></Key>
-            <Key char="3" :input="input"></Key>
-            <Key char="4" :input="input"></Key>
-            <Key char="5" :input="input"></Key>
-            <Key char="6" :input="input"></Key>
-            <Key char="7" :input="input"></Key>
-            <Key char="8" :input="input"></Key>
-            <Key char="9" :input="input"></Key>
+            <Key char="0" :input="update"></Key>
+            <Key char="1" :input="update"></Key>
+            <Key char="2" :input="update"></Key>
+            <Key char="3" :input="update"></Key>
+            <Key char="4" :input="update"></Key>
+            <Key char="5" :input="update"></Key>
+            <Key char="6" :input="update"></Key>
+            <Key char="7" :input="update"></Key>
+            <Key char="8" :input="update"></Key>
+            <Key char="9" :input="update"></Key>
         </div>
         <div class="operator">
-            <Key char="+" :input="input"></Key>
-            <Key char="-" :input="input"></Key>
-            <Key char="*" :input="input"></Key>
-            <Key char="/" :input="input"></Key>
+            <Key char="+" :input="update"></Key>
+            <Key char="-" :input="update"></Key>
+            <Key char="*" :input="update"></Key>
+            <Key char="/" :input="update"></Key>
         </div>
         <div class="special">
-            <Key char="delete" :input="input"></Key>
-            <Key char="return" :input="input"></Key>
+            <Key char="delete" :input="update"></Key>
+            <Key char="return" :input="update"></Key>
         </div>
     </div>
 
@@ -126,7 +164,6 @@ export default defineComponent({
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     grid-gap: 5px;
-    /* center */
     justify-content: center;
 }
 
@@ -157,7 +194,6 @@ export default defineComponent({
 }
 
 .equal {
-    /* red color */
     color: rgb(0, 0, 0);
     width: 100%;
     display: inline-flex;
@@ -176,18 +212,17 @@ export default defineComponent({
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     grid-gap: 5px;
-    /* center */
     justify-content: center;
     margin-top: 30px;
     width: 400px;
     height: 100px;
     margin-inline: auto;
 }
+
 .operator {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     grid-gap: 5px;
-    /* center */
     justify-content: center;
     margin-top: 30px;
     width: 400px;
@@ -212,5 +247,18 @@ export default defineComponent({
     flex-direction: column;
     align-items: center;
     justify-content: center;
+}
+
+
+.correct {
+    background-color: rgb(99, 172, 99) !important;
+}
+
+.half {
+    background-color: rgb(211, 211, 101) !important;
+}
+
+.notcollect {
+    background-color: rgb(110, 108, 108) !important;
 }
 </style>

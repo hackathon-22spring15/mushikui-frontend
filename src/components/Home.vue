@@ -116,7 +116,7 @@ export default defineComponent({
 
 <template>
     <div class="board">
-        <div class="row" v-for="row, i in lines">
+        <div class="row" v-for="row, i in lines" :key="i">
             <div class="tile"
                 v-bind:class="{ correct: isCollect[i][j], half: isHalfCollect[i][j], notcollect: isnotCollect[i][j]}"
                 v-for="element, j in row.left" :key="j">

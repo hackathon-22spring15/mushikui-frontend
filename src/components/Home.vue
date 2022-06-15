@@ -58,7 +58,7 @@ function input(char: string) {
         // judge(lines.value[current_row.value])
         
         idx.value = 0;
-    } else if (idx.value > (LEFT_LEN + RIGHT_LEN + 1)) {
+    } else if (idx.value > (LEFT_LEN + RIGHT_LEN - 1)) {
         console.log("skip")
     } else {
         if (idx.value > (LEFT_LEN - 1)) {

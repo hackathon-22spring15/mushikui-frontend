@@ -135,8 +135,8 @@ export default defineComponent({
     grid-template-rows: repeat(5, 1fr);
     margin-top: 30px;
     grid-gap: 10px;
-    height: 250px;
-    width: 350px;
+    height: 400px;
+    width: 560px;
     margin-inline: auto;
 }
 

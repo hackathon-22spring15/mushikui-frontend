@@ -4,7 +4,7 @@
       <div class="modal-wrapper">
         <div class="modal-container">
           <div class="modal-header">
-            <button class="modal-default-button" @click="$emit('close')">
+            <button class="modal-close-button" @click="$emit('close')">
               x
             </button>
           </div>
@@ -13,7 +13,11 @@
             <div class="timer">{{ hours }}:{{ minutes }}:{{ seconds }}</div>
           </div>
           <div class="modal-footer">
-            <div name="footer"></div>
+            <div name="footer">
+              <button class="modal-share-button" @click="twittersharebutton">
+                share on twitter
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -58,10 +62,18 @@ export default defineComponent({
       setInterval(setDate, 1000);
     });
 
+    const TwitterBaseUrl = "https://twitter.com/intent/tweet?";
+    const ShareTextBody = ref("いい感じのコメント");
+    const ShareTextURL = "https://trap.jp";
+    const twittersharebutton = () => {
+      window.open(TwitterBaseUrl.concat("text=",ShareTextBody.value,"%0a","&url=",ShareTextURL),"twitter");
+    };
+
     return {
       hours,
       minutes,
-      seconds
+      seconds,
+      twittersharebutton,
     };
   }
 });
@@ -104,8 +116,12 @@ export default defineComponent({
   margin: 20px 0;
 }
 
-.modal-default-button {
+.modal-close-button {
   float: right;
+}
+
+.modal-share-button {
+  float: center;
 }
 
 /*

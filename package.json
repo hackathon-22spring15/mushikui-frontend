@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "gen-api": "node ./scripts/generate-apis.js",
+    "clean": "rimraf ./src/lib/apis/generated"
   },
   "dependencies": {
     "vue": "^3.2.25"

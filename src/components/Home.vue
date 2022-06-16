@@ -1,5 +1,4 @@
 <script lang="ts">
-import { parse } from 'path'
 import { defineComponent, ref, computed, version } from 'vue'
 import Key from "./Key.vue"
 
@@ -7,46 +6,54 @@ import Key from "./Key.vue"
 export default defineComponent({
     setup() {
 
-        const RIGHT_LEN = 3
-        const LEFT_LEN = 3
+        const RIGHT_LEN = 4
+        const LEFT_LEN = 4
+        const N_ROW = 5
+
+        const EXPR_LEN = LEFT_LEN + RIGHT_LEN + 1
+
 
         const answer = ref("")
         const row_idx = ref(0)
         const col_idx = ref(0)
-        const lines = ref(
-            [
-                {
-                    left: ["", "", ""],
-                    right: ["", "", ""]
-                },
-                {
-                    left: ["", "", ""],
-                    right: ["", "", ""]
-                },
-                {
-                    left: ["", "", ""],
-                    right: ["", "", ""]
-                },
-                {
-                    left: ["", "", ""],
-                    right: ["", "", ""]
-                },
-                {
-                    left: ["", "", ""],
-                    right: ["", "", ""]
+
+
+        function init_line(left_len: number, right_len: number, n_row: number): { left: string[], right: string[] }[] {
+            let result = []
+            let _left = []
+            let _right = []
+            for (let i = 0; i < n_row; i++) {
+                _left = []
+                _right = []
+                for (let j = 0; j < left_len; j++) {
+                    _left.push("")
                 }
-            ]
-        )
+                for (let j = 0; j < right_len; j++) {
+                    _right.push("")
+                }
+                result.push({
+                    left: _left,
+                    right: _right
+                })
+            }
+            return result
+        }
 
 
+        function init_result(left_len: number, right_len: number, n_row: number): Array<Array<string>> {
+            let result = []
+            for (let i = 0; i < n_row; i++) {
+                let _row = []
+                for (let j = 0; j < left_len + right_len; j++) {
+                    _row.push("")
+                }
+                result.push(_row)
+            }
+            return result
+        }
 
-        const results = ref([
-            ["-", "-", "-", "-", "-", "-"],
-            ["-", "-", "-", "-", "-", "-"],
-            ["-", "-", "-", "-", "-", "-"],
-            ["-", "-", "-", "-", "-", "-"],
-            ["-", "-", "-", "-", "-", "-"]
-        ])
+        const lines = ref(init_line(LEFT_LEN, RIGHT_LEN, N_ROW))
+        const results = ref(init_result(LEFT_LEN, RIGHT_LEN, N_ROW))
 
 
         const result_by_value = ref([
@@ -105,6 +112,8 @@ export default defineComponent({
                 return results.value.map(result => result.map(e => e === "x"))
             }
         )
+
+
 
 
         function judge(left: string, right: string) {
@@ -174,7 +183,7 @@ export default defineComponent({
         }
 
         const zero_is_collect = true
-        return { lines, answer, update, row_idx, col_idx, results, isCollect, isHalfCollect, isnotCollect, zero_is_collect, result_by_value, isCollect_by_value, isHalfCollect_by_value, isnotCollect_by_value, LEFT_LEN, RIGHT_LEN }
+        return { lines, answer, update, row_idx, col_idx, results, isCollect, isHalfCollect, isnotCollect, zero_is_collect, result_by_value, isCollect_by_value, isHalfCollect_by_value, isnotCollect_by_value, LEFT_LEN, RIGHT_LEN, EXPR_LEN, N_ROW }
     },
     components: {
         Key
@@ -203,22 +212,50 @@ export default defineComponent({
 
     <div class="keyboard">
         <div class="numbers">
-            <Key char="0" v-bind:class="{ correct: isCollect_by_value[0], half: isHalfCollect_by_value[0], notcollect: isnotCollect_by_value[0] }" :input="update"></Key>
-            <Key char="1" v-bind:class="{ correct: isCollect_by_value[1], half: isHalfCollect_by_value[1], notcollect: isnotCollect_by_value[1] }" :input="update"></Key>
-            <Key char="2" v-bind:class="{ correct: isCollect_by_value[2], half: isHalfCollect_by_value[2], notcollect: isnotCollect_by_value[2] }" :input="update"></Key>
-            <Key char="3" v-bind:class="{ correct: isCollect_by_value[3], half: isHalfCollect_by_value[3], notcollect: isnotCollect_by_value[3] }" :input="update"></Key>
-            <Key char="4" v-bind:class="{ correct: isCollect_by_value[4], half: isHalfCollect_by_value[4], notcollect: isnotCollect_by_value[4] }" :input="update"></Key>
-            <Key char="5" v-bind:class="{ correct: isCollect_by_value[5], half: isHalfCollect_by_value[5], notcollect: isnotCollect_by_value[5] }" :input="update"></Key>
-            <Key char="6" v-bind:class="{ correct: isCollect_by_value[6], half: isHalfCollect_by_value[6], notcollect: isnotCollect_by_value[6] }" :input="update"></Key>
-            <Key char="7" v-bind:class="{ correct: isCollect_by_value[7], half: isHalfCollect_by_value[7], notcollect: isnotCollect_by_value[7] }" :input="update"></Key>
-            <Key char="8" v-bind:class="{ correct: isCollect_by_value[8], half: isHalfCollect_by_value[8], notcollect: isnotCollect_by_value[8] }" :input="update"></Key>
-            <Key char="9" v-bind:class="{ correct: isCollect_by_value[9], half: isHalfCollect_by_value[9], notcollect: isnotCollect_by_value[9] }" :input="update"></Key>
+            <Key char="0"
+                v-bind:class="{ correct: isCollect_by_value[0], half: isHalfCollect_by_value[0], notcollect: isnotCollect_by_value[0] }"
+                :input="update"></Key>
+            <Key char="1"
+                v-bind:class="{ correct: isCollect_by_value[1], half: isHalfCollect_by_value[1], notcollect: isnotCollect_by_value[1] }"
+                :input="update"></Key>
+            <Key char="2"
+                v-bind:class="{ correct: isCollect_by_value[2], half: isHalfCollect_by_value[2], notcollect: isnotCollect_by_value[2] }"
+                :input="update"></Key>
+            <Key char="3"
+                v-bind:class="{ correct: isCollect_by_value[3], half: isHalfCollect_by_value[3], notcollect: isnotCollect_by_value[3] }"
+                :input="update"></Key>
+            <Key char="4"
+                v-bind:class="{ correct: isCollect_by_value[4], half: isHalfCollect_by_value[4], notcollect: isnotCollect_by_value[4] }"
+                :input="update"></Key>
+            <Key char="5"
+                v-bind:class="{ correct: isCollect_by_value[5], half: isHalfCollect_by_value[5], notcollect: isnotCollect_by_value[5] }"
+                :input="update"></Key>
+            <Key char="6"
+                v-bind:class="{ correct: isCollect_by_value[6], half: isHalfCollect_by_value[6], notcollect: isnotCollect_by_value[6] }"
+                :input="update"></Key>
+            <Key char="7"
+                v-bind:class="{ correct: isCollect_by_value[7], half: isHalfCollect_by_value[7], notcollect: isnotCollect_by_value[7] }"
+                :input="update"></Key>
+            <Key char="8"
+                v-bind:class="{ correct: isCollect_by_value[8], half: isHalfCollect_by_value[8], notcollect: isnotCollect_by_value[8] }"
+                :input="update"></Key>
+            <Key char="9"
+                v-bind:class="{ correct: isCollect_by_value[9], half: isHalfCollect_by_value[9], notcollect: isnotCollect_by_value[9] }"
+                :input="update"></Key>
         </div>
         <div class="operator">
-            <Key char="+" v-bind:class="{ correct: isCollect_by_value[10], half: isHalfCollect_by_value[10], notcollect: isnotCollect_by_value[10] }" :input="update"></Key>
-            <Key char="-" v-bind:class="{ correct: isCollect_by_value[11], half: isHalfCollect_by_value[11], notcollect: isnotCollect_by_value[11] }" :input="update"></Key>
-            <Key char="*" v-bind:class="{ correct: isCollect_by_value[12], half: isHalfCollect_by_value[12], notcollect: isnotCollect_by_value[12] }" :input="update"></Key>
-            <Key char="/" v-bind:class="{ correct: isCollect_by_value[13], half: isHalfCollect_by_value[13], notcollect: isnotCollect_by_value[13] }" :input="update"></Key>
+            <Key char="+"
+                v-bind:class="{ correct: isCollect_by_value[10], half: isHalfCollect_by_value[10], notcollect: isnotCollect_by_value[10] }"
+                :input="update"></Key>
+            <Key char="-"
+                v-bind:class="{ correct: isCollect_by_value[11], half: isHalfCollect_by_value[11], notcollect: isnotCollect_by_value[11] }"
+                :input="update"></Key>
+            <Key char="*"
+                v-bind:class="{ correct: isCollect_by_value[12], half: isHalfCollect_by_value[12], notcollect: isnotCollect_by_value[12] }"
+                :input="update"></Key>
+            <Key char="/"
+                v-bind:class="{ correct: isCollect_by_value[13], half: isHalfCollect_by_value[13], notcollect: isnotCollect_by_value[13] }"
+                :input="update"></Key>
         </div>
         <div class="special">
             <Key char="delete" :input="update"></Key>
@@ -232,14 +269,14 @@ export default defineComponent({
 <style scoped>
 .row {
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
+    grid-template-columns: repeat(v-bind(EXPR_LEN), 1fr);
     grid-gap: 5px;
     justify-content: center;
 }
 
 .board {
     display: grid;
-    grid-template-rows: repeat(5, 1fr);
+    grid-template-rows: repeat(v-bind(N_ROW), 1fr);
     margin-top: 30px;
     grid-gap: 10px;
     height: 400px;

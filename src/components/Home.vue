@@ -6,18 +6,46 @@ import Key from "./Key.vue"
 export default defineComponent({
     setup() {
 
-        const RIGHT_LEN = 4
-        const LEFT_LEN = 4
+        // イコールの右側にある枠の数
+        const RIGHT_LEN = 3
+        // イコールの左側にある枠の数
+        const LEFT_LEN = 3
+        // 行の数
         const N_ROW = 5
 
+        // イコールを含めた式の要素の数
         const EXPR_LEN = LEFT_LEN + RIGHT_LEN + 1
 
-
-        const answer = ref("")
+        // 現在入力中の枠が何行目か
         const row_idx = ref(0)
+        // 現在入力中の枠が何列目か
         const col_idx = ref(0)
-
-
+        
+        // left_len, right_len, n_rowから空文字列で初期化された結果を格納する配列を作る
+        //
+        // 例:init_line(3, 3, 5) -> 
+        // [
+        //     {
+        //         left: ["", "", ""],
+        //         right: ["", "", ""]
+        //     },
+        //     {
+        //         left: ["", "", ""],
+        //         right: ["", "", ""]
+        //     },
+        //     {
+        //         left: ["", "", ""],
+        //         right: ["", "", ""]
+        //     },
+        //     {
+        //         left: ["", "", ""],
+        //         right: ["", "", ""]
+        //     },
+        //     {
+        //         left: ["", "", ""],
+        //         right: ["", "", ""]
+        //     }
+        // ]
         function init_line(left_len: number, right_len: number, n_row: number): { left: string[], right: string[] }[] {
             let result = []
             let _left = []
@@ -39,7 +67,15 @@ export default defineComponent({
             return result
         }
 
-
+        // 判定の結果を格納する空文字列で初期化された二次元配列を生成する
+        // 例:init_result(3, 3, 5) ->
+        // [
+        //     ["-", "-", "-", "-", "-", "-"],
+        //     ["-", "-", "-", "-", "-", "-"],
+        //     ["-", "-", "-", "-", "-", "-"],
+        //     ["-", "-", "-", "-", "-", "-"],
+        //     ["-", "-", "-", "-", "-", "-"]
+        // ]
         function init_result(left_len: number, right_len: number, n_row: number): Array<Array<string>> {
             let result = []
             for (let i = 0; i < n_row; i++) {
@@ -52,10 +88,12 @@ export default defineComponent({
             return result
         }
 
+
         const lines = ref(init_line(LEFT_LEN, RIGHT_LEN, N_ROW))
         const results = ref(init_result(LEFT_LEN, RIGHT_LEN, N_ROW))
 
-
+        // 各値,  演算子についての判定結果を保存する配列
+        // 例えば一番最後の要素は / の判定結果を格納
         const result_by_value = ref([
             "", // 0
             "", // 1
@@ -120,8 +158,10 @@ export default defineComponent({
             return ["o", "o", "o", "h", "x", "o"]
         }
 
+        // 入力に応じて`lines`を更新して、"enter"が押されたらジャッジをする。
         function update(char: string) {
             if (char === "delete") {
+                // col_idx.value === 0 な時、まだ何も入力されていないのでスキップ
                 if (col_idx.value === 0) {
                     return
                 }
@@ -132,11 +172,16 @@ export default defineComponent({
                 }
                 col_idx.value--
             } else if (char === "return") {
+                // 入力しきっていない場合はalertを出す
                 if (col_idx.value !== (LEFT_LEN + RIGHT_LEN)) {
                     alert("plese input all")
                     return
                 }
+
+                // ジャッジする
                 results.value[row_idx.value] = judge(lines.value[row_idx.value].left.join(), lines.value[row_idx.value].right.join())
+                
+                // ジャッジ結果をresult_by_valueに代入していく。
                 for (let i = 0; i < LEFT_LEN; i++) {
                     const v = lines.value[row_idx.value].left[i]
                     if (v === "+") {
@@ -170,9 +215,10 @@ export default defineComponent({
                 row_idx.value++;
                 col_idx.value = 0;
             } else if (col_idx.value > (LEFT_LEN + RIGHT_LEN - 1)) {
-                // skip
+                // すでに入力しきっているのにさらに入力が来た場合。 なのでスキップ
                 return
             } else {
+                // 正しい入力 
                 if (col_idx.value > (LEFT_LEN - 1)) {
                     lines.value[row_idx.value].right[col_idx.value - LEFT_LEN] = char
                 } else {
@@ -182,8 +228,7 @@ export default defineComponent({
             }
         }
 
-        const zero_is_collect = true
-        return { lines, answer, update, row_idx, col_idx, results, isCollect, isHalfCollect, isnotCollect, zero_is_collect, result_by_value, isCollect_by_value, isHalfCollect_by_value, isnotCollect_by_value, LEFT_LEN, RIGHT_LEN, EXPR_LEN, N_ROW }
+        return { lines, update, row_idx, col_idx, results, isCollect, isHalfCollect, isnotCollect, result_by_value, isCollect_by_value, isHalfCollect_by_value, isnotCollect_by_value, LEFT_LEN, RIGHT_LEN, EXPR_LEN, N_ROW }
     },
     components: {
         Key

@@ -46,7 +46,6 @@ export default defineComponent({
             ["-", "-", "-", "-", "-", "-"],
             ["-", "-", "-", "-", "-", "-"],
             ["-", "-", "-", "-", "-", "-"]
-
         ])
 
 
@@ -147,15 +146,15 @@ export default defineComponent({
                 for (let i = 0; i < RIGHT_LEN; i++) {
                     const v = lines.value[row_idx.value].right[i]
                     if (v == "+") {
-                        result_by_value.value[10] = results.value[row_idx.value][i + 3]
+                        result_by_value.value[10] = results.value[row_idx.value][i + LEFT_LEN]
                     } else if (v == "-") {
-                        result_by_value.value[11] = results.value[row_idx.value][i + 3]
+                        result_by_value.value[11] = results.value[row_idx.value][i + LEFT_LEN]
                     } else if (v == "*") {
-                        result_by_value.value[12] = results.value[row_idx.value][i + 3]
+                        result_by_value.value[12] = results.value[row_idx.value][i + LEFT_LEN]
                     } else if (v == "/") {
-                        result_by_value.value[13] = results.value[row_idx.value][i + 3]
+                        result_by_value.value[13] = results.value[row_idx.value][i + LEFT_LEN]
                     } else {
-                        result_by_value.value[parseInt(v)] = results.value[row_idx.value][i + 3]
+                        result_by_value.value[parseInt(v)] = results.value[row_idx.value][i + LEFT_LEN]
                     }
                 }
 
@@ -175,7 +174,7 @@ export default defineComponent({
         }
 
         const zero_is_collect = true
-        return { lines, answer, update, row_idx, col_idx, results, isCollect, isHalfCollect, isnotCollect, zero_is_collect, result_by_value, isCollect_by_value, isHalfCollect_by_value, isnotCollect_by_value}
+        return { lines, answer, update, row_idx, col_idx, results, isCollect, isHalfCollect, isnotCollect, zero_is_collect, result_by_value, isCollect_by_value, isHalfCollect_by_value, isnotCollect_by_value, LEFT_LEN, RIGHT_LEN }
     },
     components: {
         Key
@@ -195,7 +194,7 @@ export default defineComponent({
             </div>
             <div class="equal"> = </div>
             <div class="tile"
-                v-bind:class="{ current_input: ((row_idx === i) && (col_idx === j + 3)), correct: isCollect[i][j + 3], half: isHalfCollect[i][j + 3], notcollect: isnotCollect[i][j + 3] }"
+                v-bind:class="{ current_input: ((row_idx === i) && (col_idx === j + LEFT_LEN)), correct: isCollect[i][j + LEFT_LEN], half: isHalfCollect[i][j + 3], notcollect: isnotCollect[i][j + LEFT_LEN] }"
                 v-for="element, j in row.right" :key="j">
                 {{ element }}
             </div>

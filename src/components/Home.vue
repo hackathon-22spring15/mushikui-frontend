@@ -118,13 +118,13 @@ export default defineComponent({
     <div class="board">
         <div class="row" v-for="row, i in lines" :key="i">
             <div class="tile"
-                v-bind:class="{ current_input: ((row_idx == i) && (col_idx == j)), correct: isCollect[i][j], half: isHalfCollect[i][j], notcollect: isnotCollect[i][j]}"
+                v-bind:class="{ current_input: ((row_idx === i) && (col_idx === j)), correct: isCollect[i][j], half: isHalfCollect[i][j], notcollect: isnotCollect[i][j]}"
                 v-for="element, j in row.left" :key="j">
                 {{ element }}
             </div>
             <div class="equal"> = </div>
             <div class="tile"
-                v-bind:class="{ current_input: ((row_idx == i) && (col_idx == j+3)), correct: isCollect[i][j + 3], half: isHalfCollect[i][j + 3], notcollect: isnotCollect[i][j + 3] }"
+                v-bind:class="{ current_input: ((row_idx === i) && (col_idx === j+3)), correct: isCollect[i][j + 3], half: isHalfCollect[i][j + 3], notcollect: isnotCollect[i][j + 3] }"
                 v-for="element, j in row.right" :key="j">
                 {{ element }}
             </div>

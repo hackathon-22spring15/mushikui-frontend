@@ -1,30 +1,32 @@
-<script setup lang="ts">
-// This starter template is using Vue 3 <script setup> SFCs
-// Check out https://vuejs.org/api/sfc-script-setup.html#script-setup
-import HelloWorld from './components/HelloWorld.vue'
-import { ref } from 'vue'
-import Modal from './components/Modal.vue'
-const showModal=ref(false)
-</script>
-
 <template>
-  <img alt="Vue logo" src="./assets/logo.png" />
-  <HelloWorld msg="Hello Vue 3 + TypeScript + Vite" />
-  <button id="show-modal" @click="showModal = true">Show Modal</button>
-  <Teleport to="body">
-    <!-- use the modal component, pass in the prop -->
-    <modal :show="showModal" @close="showModal = false">
-    </modal>
-  </Teleport>
+  <Header></Header>
+  <Home></Home>
 </template>
 
+<script lang="ts">
+import { defineComponent } from 'vue'
+import Header from './components/Header.vue'
+import Home from './components/Home.vue'
+
+export default defineComponent({
+    components: {
+        Header,
+        Home,
+    },
+    setup() {
+    },
+})
+</script>
+
 <style>
+body,
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+  margin: 0;
+  min-height: 100vh;
+}
+
+#app {
+  display: flex;
+  flex-direction: column;
 }
 </style>

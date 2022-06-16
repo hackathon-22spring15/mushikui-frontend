@@ -104,7 +104,7 @@ export default defineComponent({
             }
         }
 
-        return { lines, answer, update, results, isCollect, isHalfCollect, isnotCollect }
+        return { lines, answer, update, row_idx, col_idx, results, isCollect, isHalfCollect, isnotCollect }
     },
     components: {
         Key
@@ -118,13 +118,13 @@ export default defineComponent({
     <div class="board">
         <div class="row" v-for="row, i in lines" :key="i">
             <div class="tile"
-                v-bind:class="{ correct: isCollect[i][j], half: isHalfCollect[i][j], notcollect: isnotCollect[i][j]}"
+                v-bind:class="{ current_input: ((row_idx == i) && (col_idx == j)), correct: isCollect[i][j], half: isHalfCollect[i][j], notcollect: isnotCollect[i][j]}"
                 v-for="element, j in row.left" :key="j">
                 {{ element }}
             </div>
             <div class="equal"> = </div>
             <div class="tile"
-                v-bind:class="{ correct: isCollect[i][j + 3], half: isHalfCollect[i][j + 3], notcollect: isnotCollect[i][j + 3] }"
+                v-bind:class="{ current_input: ((row_idx == i) && (col_idx == j+3)), correct: isCollect[i][j + 3], half: isHalfCollect[i][j + 3], notcollect: isnotCollect[i][j + 3] }"
                 v-for="element, j in row.right" :key="j">
                 {{ element }}
             </div>
@@ -191,6 +191,7 @@ export default defineComponent({
     text-transform: uppercase;
     user-select: none;
     background-color: rgb(223, 223, 223);
+    box-shadow: 0 3px 4px rgba(0, 0, 0, 0.32);/*影*/
 }
 
 .equal {
@@ -261,4 +262,12 @@ export default defineComponent({
 .notcollect {
     background-color: rgb(110, 108, 108) !important;
 }
+
+
+.current_input {
+    background-color: rgb(84, 84, 84) !important;
+    box-shadow: none !important;
+}
+
+
 </style>

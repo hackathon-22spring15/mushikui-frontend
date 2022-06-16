@@ -69,21 +69,21 @@ export default defineComponent({
 
         const isCollect_by_value = computed(
             () => {
-                return result_by_value.value.map(e => e == "o")
+                return result_by_value.value.map(e => e === "o")
             }
         )
 
 
         const isHalfCollect_by_value = computed(
             () => {
-                return result_by_value.value.map(e => e == "h")
+                return result_by_value.value.map(e => e === "h")
             }
         )
 
 
         const isnotCollect_by_value = computed(
             () => {
-                return result_by_value.value.map(e => e == "x")
+                return result_by_value.value.map(e => e === "x")
             }
         )
 
@@ -130,13 +130,13 @@ export default defineComponent({
                 results.value[row_idx.value] = judge(lines.value[row_idx.value].left.join(), lines.value[row_idx.value].right.join())
                 for (let i = 0; i < LEFT_LEN; i++) {
                     const v = lines.value[row_idx.value].left[i]
-                    if (v == "+") {
+                    if (v === "+") {
                         result_by_value.value[10] = results.value[row_idx.value][i]
-                    } else if (v == "-") {
+                    } else if (v === "-") {
                         result_by_value.value[11] = results.value[row_idx.value][i]
-                    } else if (v == "*") {
+                    } else if (v === "*") {
                         result_by_value.value[12] = results.value[row_idx.value][i]
-                    } else if (v == "/") {
+                    } else if (v === "/") {
                         result_by_value.value[13] = results.value[row_idx.value][i]
                     } else {
                         result_by_value.value[parseInt(v)] = results.value[row_idx.value][i]
@@ -145,13 +145,13 @@ export default defineComponent({
 
                 for (let i = 0; i < RIGHT_LEN; i++) {
                     const v = lines.value[row_idx.value].right[i]
-                    if (v == "+") {
+                    if (v === "+") {
                         result_by_value.value[10] = results.value[row_idx.value][i + LEFT_LEN]
-                    } else if (v == "-") {
+                    } else if (v === "-") {
                         result_by_value.value[11] = results.value[row_idx.value][i + LEFT_LEN]
-                    } else if (v == "*") {
+                    } else if (v === "*") {
                         result_by_value.value[12] = results.value[row_idx.value][i + LEFT_LEN]
-                    } else if (v == "/") {
+                    } else if (v === "/") {
                         result_by_value.value[13] = results.value[row_idx.value][i + LEFT_LEN]
                     } else {
                         result_by_value.value[parseInt(v)] = results.value[row_idx.value][i + LEFT_LEN]

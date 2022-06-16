@@ -113,7 +113,6 @@ export default defineComponent({
         }
 
         function update(char: string) {
-            console.log(result_by_value.value)
             if (char === "delete") {
                 if (col_idx.value === 0) {
                     return
@@ -132,8 +131,6 @@ export default defineComponent({
                 results.value[row_idx.value] = judge(lines.value[row_idx.value].left.join(), lines.value[row_idx.value].right.join())
                 for (let i = 0; i < LEFT_LEN; i++) {
                     const v = lines.value[row_idx.value].left[i]
-                    console.log(v,"のジャッジ結果を登録")
-                    console.log("ジャッジ結果:", results.value[row_idx.value][i])
                     if (v == "+") {
                         result_by_value.value[10] = results.value[row_idx.value][i]
                     } else if (v == "-") {
@@ -149,8 +146,6 @@ export default defineComponent({
 
                 for (let i = 0; i < RIGHT_LEN; i++) {
                     const v = lines.value[row_idx.value].right[i]
-                    console.log(v,"のジャッジ結果を登録")
-                    console.log("ジャッジ結果:", results.value[row_idx.value][i+3])
                     if (v == "+") {
                         result_by_value.value[10] = results.value[row_idx.value][i + 3]
                     } else if (v == "-") {

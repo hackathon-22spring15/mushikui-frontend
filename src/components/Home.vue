@@ -1,454 +1,565 @@
 <script lang="ts">
-import { defineComponent, ref, computed, version } from 'vue'
-import Key from "./Key.vue"
-import { Apis, Expression } from '../lib/apis/generated/api';
-
-let api: Apis = new Apis();
+import { defineComponent, ref, computed, version } from "vue";
+import Key from "./Key.vue";
+import apis, { Expression } from "../lib/apis";
 
 const today = new Date();
 
-const date_today = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate()
+const date_today =
+  today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
 
-var pos = await api.getEqualDailyExpressionDateGet(date_today)
+var pos = await apis.getEqualDailyExpressionDateGet(date_today);
 
 export default defineComponent({
-    setup() {
-        console.log(pos.data)
+  setup() {
+    // イコールの右側にある枠の数
+    const RIGHT_LEN = 6 - pos.data["pos"];
+    // イコールの左側にある枠の数
+    const LEFT_LEN = pos.data["pos"];
+    // 行の数
+    const N_ROW = 5;
 
-        // イコールの右側にある枠の数
-        const RIGHT_LEN = 6 - pos.data["pos"]
-        // イコールの左側にある枠の数
-        const LEFT_LEN = pos.data["pos"]
-        // 行の数
-        const N_ROW = 5
+    // イコールを含めた式の要素の数
+    const EXPR_LEN = LEFT_LEN + RIGHT_LEN + 1;
 
-        // イコールを含めた式の要素の数
-        const EXPR_LEN = LEFT_LEN + RIGHT_LEN + 1
+    // 現在入力中の枠が何行目か
+    const row_idx = ref(0);
+    // 現在入力中の枠が何列目か
+    const col_idx = ref(0);
 
-        // 現在入力中の枠が何行目か
-        const row_idx = ref(0)
-        // 現在入力中の枠が何列目か
-        const col_idx = ref(0)
-        
-        // left_len, right_len, n_rowから空文字列で初期化された結果を格納する配列を作る
-        //
-        // 例:init_line(3, 3, 5) -> 
-        // [
-        //     {
-        //         left: ["", "", ""],
-        //         right: ["", "", ""]
-        //     },
-        //     {
-        //         left: ["", "", ""],
-        //         right: ["", "", ""]
-        //     },
-        //     {
-        //         left: ["", "", ""],
-        //         right: ["", "", ""]
-        //     },
-        //     {
-        //         left: ["", "", ""],
-        //         right: ["", "", ""]
-        //     },
-        //     {
-        //         left: ["", "", ""],
-        //         right: ["", "", ""]
-        //     }
-        // ]
-        function init_line(left_len: number, right_len: number, n_row: number): { left: string[], right: string[] }[] {
-            let result = []
-            let _left = []
-            let _right = []
-            for (let i = 0; i < n_row; i++) {
-                _left = []
-                _right = []
-                for (let j = 0; j < left_len; j++) {
-                    _left.push("")
-                }
-                for (let j = 0; j < right_len; j++) {
-                    _right.push("")
-                }
-                result.push({
-                    left: _left,
-                    right: _right
-                })
-            }
-            return result
+    // left_len, right_len, n_rowから空文字列で初期化された結果を格納する配列を作る
+    //
+    // 例:init_line(3, 3, 5) ->
+    // [
+    //     {
+    //         left: ["", "", ""],
+    //         right: ["", "", ""]
+    //     },
+    //     {
+    //         left: ["", "", ""],
+    //         right: ["", "", ""]
+    //     },
+    //     {
+    //         left: ["", "", ""],
+    //         right: ["", "", ""]
+    //     },
+    //     {
+    //         left: ["", "", ""],
+    //         right: ["", "", ""]
+    //     },
+    //     {
+    //         left: ["", "", ""],
+    //         right: ["", "", ""]
+    //     }
+    // ]
+    const init_line = (
+      left_len: number,
+      right_len: number,
+      n_row: number
+    ): { left: string[]; right: string[] }[] => {
+      let result = [];
+      let _left = [];
+      let _right = [];
+      for (let i = 0; i < n_row; i++) {
+        _left = [];
+        _right = [];
+        for (let j = 0; j < left_len; j++) {
+          _left.push("");
         }
-
-        // 判定の結果を格納する空文字列で初期化された二次元配列を生成する
-        // 例:init_result(3, 3, 5) ->
-        // [
-        //     ["-", "-", "-", "-", "-", "-"],
-        //     ["-", "-", "-", "-", "-", "-"],
-        //     ["-", "-", "-", "-", "-", "-"],
-        //     ["-", "-", "-", "-", "-", "-"],
-        //     ["-", "-", "-", "-", "-", "-"]
-        // ]
-        function init_result(left_len: number, right_len: number, n_row: number): Array<Array<string>> {
-            let result = []
-            for (let i = 0; i < n_row; i++) {
-                let _row = []
-                for (let j = 0; j < left_len + right_len; j++) {
-                    _row.push("")
-                }
-                result.push(_row)
-            }
-            return result
+        for (let j = 0; j < right_len; j++) {
+          _right.push("");
         }
-
-        const lines = ref(init_line(LEFT_LEN, RIGHT_LEN, N_ROW))
-        const results = ref(init_result(LEFT_LEN, RIGHT_LEN, N_ROW))
-
-        // 各値,  演算子についての判定結果を保存する配列
-        // 例えば一番最後の要素は / の判定結果を格納
-        const result_by_value = ref([
-            "", // 0
-            "", // 1
-            "", // 2
-            "", // 3
-            "", // 4
-            "", // 5
-            "", // 6
-            "", // 7
-            "", // 8
-            "", // 9
-            "", // +
-            "", // -
-            "", // *
-            "", // /
-        ])
-
-
-        const isCorrect_by_value = computed(
-            () => {
-                return result_by_value.value.map(e => e === "o")
-            }
-        )
-
-
-        const isHalfCorrect_by_value = computed(
-            () => {
-                return result_by_value.value.map(e => e === "h")
-            }
-        )
-
-
-        const isNotCorrect_by_value = computed(
-            () => {
-                return result_by_value.value.map(e => e === "x")
-            }
-        )
-
-        const isCorrect = computed(
-            () => {
-                return results.value.map(result => result.map(e => e === "o"))
-            }
-        )
-
-        const isHalfCorrect = computed(
-            () => {
-                return results.value.map(result => result.map(e => e === "h"))
-            }
-        )
-
-
-        const isNotCorrect = computed(
-            () => {
-                return results.value.map(result => result.map(e => e === "x"))
-            }
-        )
-
-        async function judge(left: string, right: string) {
-            let expr = left.concat("=", right)
-            const check = (async (expr: string) => {
-                try{
-                    var expre: Expression = {expression: expr}
-                    var response = await api.postExpressionDailyExpressionDatePost(date_today, expre)
-                    return response.data['check']
-                }
-                catch(e){
-                    console.log(e)
-                }
-            })(expr)
-            
-            var a = await check.then(value => {
-                let res = []
-                for(let i=0; i < LEFT_LEN + RIGHT_LEN;i++){
-                    if(value[i] === 0){
-                        res.push("x")
-                    }else if(value[i] === 1){
-                        res.push("o")
-                    }else if(value[i] === 2){
-                        res.push("h")
-                    }
-                }
-                return res
-            })
-            console.log(a)
-            return a
-        }
-
-        // 入力に応じて`lines`を更新して、"enter"が押されたらジャッジをする。
-        async function update(char: string) {
-            if (char === "delete") {
-                // col_idx.value === 0 な時、まだ何も入力されていないのでスキップ
-                if (col_idx.value === 0) {
-                    return
-                }
-                if ((col_idx.value - 1) > (LEFT_LEN - 1)) {
-                    lines.value[row_idx.value].right[col_idx.value - (RIGHT_LEN + 1)] = ""
-                } else {
-                    lines.value[row_idx.value].left[col_idx.value - 1] = ""
-                }
-                col_idx.value--
-            } else if (char === "return") {
-                // 入力しきっていない場合はalertを出す
-                if (col_idx.value !== (LEFT_LEN + RIGHT_LEN)) {
-                    alert("please input all")
-                    return
-                }
-
-                // ジャッジする
-                results.value[row_idx.value] = await judge(lines.value[row_idx.value].left.join(), lines.value[row_idx.value].right.join())
-                
-                // ジャッジ結果をresult_by_valueに代入していく。
-                for (let i = 0; i < LEFT_LEN; i++) {
-                    const v = lines.value[row_idx.value].left[i]
-                    if (v === "+") {
-                        result_by_value.value[10] = results.value[row_idx.value][i]
-                    } else if (v === "-") {
-                        result_by_value.value[11] = results.value[row_idx.value][i]
-                    } else if (v === "*") {
-                        result_by_value.value[12] = results.value[row_idx.value][i]
-                    } else if (v === "/") {
-                        result_by_value.value[13] = results.value[row_idx.value][i]
-                    } else {
-                        result_by_value.value[parseInt(v)] = results.value[row_idx.value][i]
-                    }
-                }
-
-                for (let i = 0; i < RIGHT_LEN; i++) {
-                    const v = lines.value[row_idx.value].right[i]
-                    if (v === "+") {
-                        result_by_value.value[10] = results.value[row_idx.value][i + LEFT_LEN]
-                    } else if (v === "-") {
-                        result_by_value.value[11] = results.value[row_idx.value][i + LEFT_LEN]
-                    } else if (v === "*") {
-                        result_by_value.value[12] = results.value[row_idx.value][i + LEFT_LEN]
-                    } else if (v === "/") {
-                        result_by_value.value[13] = results.value[row_idx.value][i + LEFT_LEN]
-                    } else {
-                        result_by_value.value[parseInt(v)] = results.value[row_idx.value][i + LEFT_LEN]
-                    }
-                }
-
-                row_idx.value++;
-                col_idx.value = 0;
-            } else if (col_idx.value > (LEFT_LEN + RIGHT_LEN - 1)) {
-                // すでに入力しきっているのにさらに入力が来た場合。 なのでスキップ
-                return
-            } else {
-                // 正しい入力 
-                if (col_idx.value > (LEFT_LEN - 1)) {
-                    lines.value[row_idx.value].right[col_idx.value - LEFT_LEN] = char
-                } else {
-                    lines.value[row_idx.value].left[col_idx.value] = char
-                }
-                col_idx.value++
-            }
-        }
-
-        return { lines, update, row_idx, col_idx, results, isCorrect, isHalfCorrect, isNotCorrect, result_by_value, isCorrect_by_value, isHalfCorrect_by_value, isNotCorrect_by_value, LEFT_LEN, RIGHT_LEN, EXPR_LEN, N_ROW }
-    },
-    components: {
-        Key
+        result.push({
+          left: _left,
+          right: _right,
+        });
+      }
+      return result;
     }
-})
 
+    // 判定の結果を格納する空文字列で初期化された二次元配列を生成する
+    // 例:init_result(3, 3, 5) ->
+    // [
+    //     ["-", "-", "-", "-", "-", "-"],
+    //     ["-", "-", "-", "-", "-", "-"],
+    //     ["-", "-", "-", "-", "-", "-"],
+    //     ["-", "-", "-", "-", "-", "-"],
+    //     ["-", "-", "-", "-", "-", "-"]
+    // ]
+    const init_result = (
+      left_len: number,
+      right_len: number,
+      n_row: number
+    ): Array<Array<string>> => {
+      let result = [];
+      for (let i = 0; i < n_row; i++) {
+        let _row = [];
+        for (let j = 0; j < left_len + right_len; j++) {
+          _row.push("");
+        }
+        result.push(_row);
+      }
+      return result;
+    }
 
+    const lines = ref(init_line(LEFT_LEN, RIGHT_LEN, N_ROW));
+    const results = ref(init_result(LEFT_LEN, RIGHT_LEN, N_ROW));
+
+    // 各値,  演算子についての判定結果を保存する配列
+    // 例えば一番最後の要素は / の判定結果を格納
+    const result_by_value = ref([
+      "", // 0
+      "", // 1
+      "", // 2
+      "", // 3
+      "", // 4
+      "", // 5
+      "", // 6
+      "", // 7
+      "", // 8
+      "", // 9
+      "", // +
+      "", // -
+      "", // *
+      "", // /
+    ]);
+
+    const isCorrect_by_value = computed(() => {
+      return result_by_value.value.map((e) => e === "o");
+    });
+
+    const isHalfCorrect_by_value = computed(() => {
+      return result_by_value.value.map((e) => e === "h");
+    });
+
+    const isNotCorrect_by_value = computed(() => {
+      return result_by_value.value.map((e) => e === "x");
+    });
+
+    const isCorrect = computed(() => {
+      return results.value.map((result) => result.map((e) => e === "o"));
+    });
+
+    const isHalfCorrect = computed(() => {
+      return results.value.map((result) => result.map((e) => e === "h"));
+    });
+
+    const isNotCorrect = computed(() => {
+      return results.value.map((result) => result.map((e) => e === "x"));
+    });
+
+    const judge = async (left: string, right: string) => {
+      let expr = left.concat("=", right);
+      const check = (async (expr: string) => {
+        try {
+          var expre: Expression = { expression: expr };
+          var response = await apis.postExpressionDailyExpressionDatePost(
+            date_today,
+            expre
+          );
+          return response.data.check;
+        } catch (e) {
+          console.log(e);
+          return [];
+        }
+      })(expr);
+
+      var a = await check.then((value) => {
+        let res = [];
+        for (let i = 0; i < LEFT_LEN + RIGHT_LEN; i++) {
+          if (value[i] === 0) {
+            res.push("x");
+          } else if (value[i] === 1) {
+            res.push("o");
+          } else if (value[i] === 2) {
+            res.push("h");
+          }
+        }
+        return res;
+      });
+      console.log(a);
+      return a;
+    }
+
+    // 入力に応じて`lines`を更新して、"enter"が押されたらジャッジをする。
+    const update = async (char: string) => {
+      if (char === "delete") {
+        // col_idx.value === 0 な時、まだ何も入力されていないのでスキップ
+        if (col_idx.value === 0) {
+          return;
+        }
+        if (col_idx.value - 1 > LEFT_LEN - 1) {
+          lines.value[row_idx.value].right[col_idx.value - (LEFT_LEN + 1)] =
+            "";
+        } else {
+          lines.value[row_idx.value].left[col_idx.value - 1] = "";
+        }
+        col_idx.value--;
+      } else if (char === "return") {
+        // 入力しきっていない場合はalertを出す
+        if (col_idx.value !== LEFT_LEN + RIGHT_LEN) {
+          alert("please input all");
+          return;
+        }
+
+        // ジャッジする
+        results.value[row_idx.value] = await judge(
+          lines.value[row_idx.value].left.join(''),
+          lines.value[row_idx.value].right.join('')
+        );
+
+        // ジャッジ結果をresult_by_valueに代入していく。
+        for (let i = 0; i < LEFT_LEN; i++) {
+          const v = lines.value[row_idx.value].left[i];
+          if (v === "+") {
+            result_by_value.value[10] = results.value[row_idx.value][i];
+          } else if (v === "-") {
+            result_by_value.value[11] = results.value[row_idx.value][i];
+          } else if (v === "*") {
+            result_by_value.value[12] = results.value[row_idx.value][i];
+          } else if (v === "/") {
+            result_by_value.value[13] = results.value[row_idx.value][i];
+          } else {
+            result_by_value.value[parseInt(v)] =
+              results.value[row_idx.value][i];
+          }
+        }
+
+        for (let i = 0; i < RIGHT_LEN; i++) {
+          const v = lines.value[row_idx.value].right[i];
+          if (v === "+") {
+            result_by_value.value[10] =
+              results.value[row_idx.value][i + LEFT_LEN];
+          } else if (v === "-") {
+            result_by_value.value[11] =
+              results.value[row_idx.value][i + LEFT_LEN];
+          } else if (v === "*") {
+            result_by_value.value[12] =
+              results.value[row_idx.value][i + LEFT_LEN];
+          } else if (v === "/") {
+            result_by_value.value[13] =
+              results.value[row_idx.value][i + LEFT_LEN];
+          } else {
+            result_by_value.value[parseInt(v)] =
+              results.value[row_idx.value][i + LEFT_LEN];
+          }
+        }
+
+        row_idx.value++;
+        col_idx.value = 0;
+      } else if (col_idx.value > LEFT_LEN + RIGHT_LEN - 1) {
+        // すでに入力しきっているのにさらに入力が来た場合。 なのでスキップ
+        return;
+      } else {
+        // 正しい入力
+        if (col_idx.value > LEFT_LEN - 1) {
+          lines.value[row_idx.value].right[col_idx.value - LEFT_LEN] = char;
+        } else {
+          lines.value[row_idx.value].left[col_idx.value] = char;
+        }
+        col_idx.value++;
+      }
+    }
+
+    return {
+      lines,
+      update,
+      row_idx,
+      col_idx,
+      results,
+      isCorrect,
+      isHalfCorrect,
+      isNotCorrect,
+      result_by_value,
+      isCorrect_by_value,
+      isHalfCorrect_by_value,
+      isNotCorrect_by_value,
+      LEFT_LEN,
+      RIGHT_LEN,
+      EXPR_LEN,
+      N_ROW,
+    };
+  },
+  components: {
+    Key,
+  },
+});
 </script>
 
 <template>
-    <div class="board">
-        <div class="row" v-for="row, i in lines" :key="i">
-            <div class="tile"
-                v-bind:class="{ current_input: ((row_idx === i) && (col_idx === j)), correct: isCorrect[i][j], half: isHalfCorrect[i][j], notCorrect: isNotCorrect[i][j] }"
-                v-for="element, j in row.left" :key="j">
-                {{ element }}
-            </div>
-            <div class="equal"> = </div>
-            <div class="tile"
-                v-bind:class="{ current_input: ((row_idx === i) && (col_idx === j + LEFT_LEN)), correct: isCorrect[i][j + LEFT_LEN], half: isHalfCorrect[i][j + LEFT_LEN], notCorrect: isNotCorrect[i][j + LEFT_LEN] }"
-                v-for="element, j in row.right" :key="j">
-                {{ element }}
-            </div>
-        </div>
+  <div class="board">
+    <div class="row" v-for="(row, i) in lines" :key="i">
+      <div
+        class="tile"
+        v-bind:class="{
+          current_input: row_idx === i && col_idx === j,
+          correct: isCorrect[i][j],
+          half: isHalfCorrect[i][j],
+          notCorrect: isNotCorrect[i][j],
+        }"
+        v-for="(element, j) in row.left"
+        :key="j"
+      >
+        {{ element }}
+      </div>
+      <div class="equal">=</div>
+      <div
+        class="tile"
+        v-bind:class="{
+          current_input: row_idx === i && col_idx === j + LEFT_LEN,
+          correct: isCorrect[i][j + LEFT_LEN],
+          half: isHalfCorrect[i][j + LEFT_LEN],
+          notCorrect: isNotCorrect[i][j + LEFT_LEN],
+        }"
+        v-for="(element, j) in row.right"
+        :key="j"
+      >
+        {{ element }}
+      </div>
     </div>
+  </div>
 
-    <div class="keyboard">
-        <div class="numbers">
-            <Key char="0"
-                v-bind:class="{ correct: isCorrect_by_value[0], half: isHalfCorrect_by_value[0], notCorrect: isNotCorrect_by_value[0] }"
-                :input="update"></Key>
-            <Key char="1"
-                v-bind:class="{ correct: isCorrect_by_value[1], half: isHalfCorrect_by_value[1], notCorrect: isNotCorrect_by_value[1] }"
-                :input="update"></Key>
-            <Key char="2"
-                v-bind:class="{ correct: isCorrect_by_value[2], half: isHalfCorrect_by_value[2], notCorrect: isNotCorrect_by_value[2] }"
-                :input="update"></Key>
-            <Key char="3"
-                v-bind:class="{ correct: isCorrect_by_value[3], half: isHalfCorrect_by_value[3], notCorrect: isNotCorrect_by_value[3] }"
-                :input="update"></Key>
-            <Key char="4"
-                v-bind:class="{ correct: isCorrect_by_value[4], half: isHalfCorrect_by_value[4], notCorrect: isNotCorrect_by_value[4] }"
-                :input="update"></Key>
-            <Key char="5"
-                v-bind:class="{ correct: isCorrect_by_value[5], half: isHalfCorrect_by_value[5], notCorrect: isNotCorrect_by_value[5] }"
-                :input="update"></Key>
-            <Key char="6"
-                v-bind:class="{ correct: isCorrect_by_value[6], half: isHalfCorrect_by_value[6], notCorrect: isNotCorrect_by_value[6] }"
-                :input="update"></Key>
-            <Key char="7"
-                v-bind:class="{ correct: isCorrect_by_value[7], half: isHalfCorrect_by_value[7], notCorrect: isNotCorrect_by_value[7] }"
-                :input="update"></Key>
-            <Key char="8"
-                v-bind:class="{ correct: isCorrect_by_value[8], half: isHalfCorrect_by_value[8], notCorrect: isNotCorrect_by_value[8] }"
-                :input="update"></Key>
-            <Key char="9"
-                v-bind:class="{ correct: isCorrect_by_value[9], half: isHalfCorrect_by_value[9], notCorrect: isNotCorrect_by_value[9] }"
-                :input="update"></Key>
-        </div>
-        <div class="operator">
-            <Key char="+"
-                v-bind:class="{ correct: isCorrect_by_value[10], half: isHalfCorrect_by_value[10], notCorrect: isNotCorrect_by_value[10] }"
-                :input="update"></Key>
-            <Key char="-"
-                v-bind:class="{ correct: isCorrect_by_value[11], half: isHalfCorrect_by_value[11], notCorrect: isNotCorrect_by_value[11] }"
-                :input="update"></Key>
-            <Key char="*"
-                v-bind:class="{ correct: isCorrect_by_value[12], half: isHalfCorrect_by_value[12], notCorrect: isNotCorrect_by_value[12] }"
-                :input="update"></Key>
-            <Key char="/"
-                v-bind:class="{ correct: isCorrect_by_value[13], half: isHalfCorrect_by_value[13], notCorrect: isNotCorrect_by_value[13] }"
-                :input="update"></Key>
-        </div>
-        <div class="special">
-            <Key char="delete" :input="update"></Key>
-            <Key char="return" :input="update"></Key>
-        </div>
+  <div class="keyboard">
+    <div class="numbers">
+      <Key
+        char="0"
+        v-bind:class="{
+          correct: isCorrect_by_value[0],
+          half: isHalfCorrect_by_value[0],
+          notCorrect: isNotCorrect_by_value[0],
+        }"
+        :input="update"
+      ></Key>
+      <Key
+        char="1"
+        v-bind:class="{
+          correct: isCorrect_by_value[1],
+          half: isHalfCorrect_by_value[1],
+          notCorrect: isNotCorrect_by_value[1],
+        }"
+        :input="update"
+      ></Key>
+      <Key
+        char="2"
+        v-bind:class="{
+          correct: isCorrect_by_value[2],
+          half: isHalfCorrect_by_value[2],
+          notCorrect: isNotCorrect_by_value[2],
+        }"
+        :input="update"
+      ></Key>
+      <Key
+        char="3"
+        v-bind:class="{
+          correct: isCorrect_by_value[3],
+          half: isHalfCorrect_by_value[3],
+          notCorrect: isNotCorrect_by_value[3],
+        }"
+        :input="update"
+      ></Key>
+      <Key
+        char="4"
+        v-bind:class="{
+          correct: isCorrect_by_value[4],
+          half: isHalfCorrect_by_value[4],
+          notCorrect: isNotCorrect_by_value[4],
+        }"
+        :input="update"
+      ></Key>
+      <Key
+        char="5"
+        v-bind:class="{
+          correct: isCorrect_by_value[5],
+          half: isHalfCorrect_by_value[5],
+          notCorrect: isNotCorrect_by_value[5],
+        }"
+        :input="update"
+      ></Key>
+      <Key
+        char="6"
+        v-bind:class="{
+          correct: isCorrect_by_value[6],
+          half: isHalfCorrect_by_value[6],
+          notCorrect: isNotCorrect_by_value[6],
+        }"
+        :input="update"
+      ></Key>
+      <Key
+        char="7"
+        v-bind:class="{
+          correct: isCorrect_by_value[7],
+          half: isHalfCorrect_by_value[7],
+          notCorrect: isNotCorrect_by_value[7],
+        }"
+        :input="update"
+      ></Key>
+      <Key
+        char="8"
+        v-bind:class="{
+          correct: isCorrect_by_value[8],
+          half: isHalfCorrect_by_value[8],
+          notCorrect: isNotCorrect_by_value[8],
+        }"
+        :input="update"
+      ></Key>
+      <Key
+        char="9"
+        v-bind:class="{
+          correct: isCorrect_by_value[9],
+          half: isHalfCorrect_by_value[9],
+          notCorrect: isNotCorrect_by_value[9],
+        }"
+        :input="update"
+      ></Key>
     </div>
-
+    <div class="operator">
+      <Key
+        char="+"
+        v-bind:class="{
+          correct: isCorrect_by_value[10],
+          half: isHalfCorrect_by_value[10],
+          notCorrect: isNotCorrect_by_value[10],
+        }"
+        :input="update"
+      ></Key>
+      <Key
+        char="-"
+        v-bind:class="{
+          correct: isCorrect_by_value[11],
+          half: isHalfCorrect_by_value[11],
+          notCorrect: isNotCorrect_by_value[11],
+        }"
+        :input="update"
+      ></Key>
+      <Key
+        char="*"
+        v-bind:class="{
+          correct: isCorrect_by_value[12],
+          half: isHalfCorrect_by_value[12],
+          notCorrect: isNotCorrect_by_value[12],
+        }"
+        :input="update"
+      ></Key>
+      <Key
+        char="/"
+        v-bind:class="{
+          correct: isCorrect_by_value[13],
+          half: isHalfCorrect_by_value[13],
+          notCorrect: isNotCorrect_by_value[13],
+        }"
+        :input="update"
+      ></Key>
+    </div>
+    <div class="special">
+      <Key char="delete" :input="update"></Key>
+      <Key char="return" :input="update"></Key>
+    </div>
+  </div>
 </template>
-
 
 <style scoped>
 .row {
-    display: grid;
-    grid-template-columns: repeat(v-bind(EXPR_LEN), 1fr);
-    grid-gap: 5px;
-    justify-content: center;
+  display: grid;
+  grid-template-columns: repeat(v-bind(EXPR_LEN), 1fr);
+  grid-gap: 5px;
+  justify-content: center;
 }
 
 .board {
-    display: grid;
-    grid-template-rows: repeat(v-bind(N_ROW), 1fr);
-    margin-top: 30px;
-    grid-gap: 10px;
-    height: 400px;
-    width: 560px;
-    margin-inline: auto;
+  display: grid;
+  grid-template-rows: repeat(v-bind(N_ROW), 1fr);
+  margin-top: 30px;
+  grid-gap: 10px;
+  height: 400px;
+  width: 560px;
+  margin-inline: auto;
 }
 
 .tile {
-    width: 100%;
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 2rem;
-    line-height: 2rem;
-    font-weight: bold;
-    vertical-align: middle;
-    box-sizing: border-box;
-    color: rgb(0, 0, 0);
-    text-transform: uppercase;
-    user-select: none;
-    background-color: rgb(223, 223, 223);
-    box-shadow: 0 3px 4px rgba(0, 0, 0, 0.32);
+  width: 100%;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 2rem;
+  line-height: 2rem;
+  font-weight: bold;
+  vertical-align: middle;
+  box-sizing: border-box;
+  color: rgb(0, 0, 0);
+  text-transform: uppercase;
+  user-select: none;
+  background-color: rgb(223, 223, 223);
+  box-shadow: 0 3px 4px rgba(0, 0, 0, 0.32);
 }
 
 .equal {
-    color: rgb(0, 0, 0);
-    width: 100%;
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 2rem;
-    line-height: 2rem;
-    font-weight: bold;
-    vertical-align: middle;
-    box-sizing: border-box;
-    text-transform: uppercase;
-    user-select: none;
+  color: rgb(0, 0, 0);
+  width: 100%;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 2rem;
+  line-height: 2rem;
+  font-weight: bold;
+  vertical-align: middle;
+  box-sizing: border-box;
+  text-transform: uppercase;
+  user-select: none;
 }
 
 .numbers {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    grid-gap: 5px;
-    justify-content: center;
-    margin-top: 30px;
-    width: 400px;
-    height: 100px;
-    margin-inline: auto;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-gap: 5px;
+  justify-content: center;
+  margin-top: 30px;
+  width: 400px;
+  height: 100px;
+  margin-inline: auto;
 }
 
 .operator {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    grid-gap: 5px;
-    justify-content: center;
-    margin-top: 30px;
-    width: 400px;
-    height: 50px;
-    margin-inline: auto;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-gap: 5px;
+  justify-content: center;
+  margin-top: 30px;
+  width: 400px;
+  height: 50px;
+  margin-inline: auto;
 }
-
 
 .special {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    grid-gap: 5px;
-    justify-content: center;
-    width: 400px;
-    margin-inline: auto;
-    margin-top: 30px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-gap: 5px;
+  justify-content: center;
+  width: 400px;
+  margin-inline: auto;
+  margin-top: 30px;
 }
-
 
 .container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
-
 .correct {
-    background-color: rgb(99, 172, 99) !important;
+  background-color: rgb(99, 172, 99) !important;
 }
 
 .half {
-    background-color: rgb(211, 211, 101) !important;
+  background-color: rgb(211, 211, 101) !important;
 }
 
 .notCorrect {
-    background-color: rgb(110, 108, 108) !important;
+  background-color: rgb(110, 108, 108) !important;
 }
 
-
 .current_input {
-    background-color: rgb(84, 84, 84) !important;
-    box-shadow: none !important;
+  background-color: rgb(84, 84, 84) !important;
+  box-shadow: none !important;
 }
 </style>

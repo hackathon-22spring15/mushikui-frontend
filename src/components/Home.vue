@@ -37,6 +37,22 @@ export default defineComponent({
         console.log(e);
       }
     });
+    
+    const logKey = (e: KeyboardEvent) => {
+      switch (e.key) {
+        case "Enter":
+          update("return");
+          break;
+        case "Backspace":
+          update("delete");
+          break;
+        default:
+          if (/^[0-9-/\+\*]$/.test(e.key)) {
+            update(e.key);
+          }
+      }
+    }
+    window.addEventListener("keydown", logKey);
 
     // left_len, right_len, n_rowから空文字列で初期化された結果を格納する配列を作る
     //

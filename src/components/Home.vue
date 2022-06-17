@@ -6,6 +6,22 @@ import Key from "./Key.vue"
 
 export default defineComponent({
     setup() {
+        window.addEventListener('keydown', logKey);
+        function logKey(e :KeyboardEvent) {
+            console.log(e.key);
+            switch(e.key){
+                case 'Enter':
+                    update('return');
+                    break;
+                case 'Backspace':
+                    update('delete');
+                    break;
+                default:
+                    if(/^[0-9-/\+\*]$/.test(e.key)){
+                        update(e.key);
+                    }
+            }
+        }
 
         const RIGHT_LEN = 3
         const LEFT_LEN = 3

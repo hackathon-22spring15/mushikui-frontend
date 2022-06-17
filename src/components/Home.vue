@@ -529,11 +529,16 @@ export default defineComponent({
 .board {
   display: grid;
   grid-template-rows: repeat(v-bind(N_ROW), 1fr);
-  margin-top: 30px;
+  margin-top: 50px;
   grid-gap: 10px;
   height: 400px;
   width: 560px;
   margin-inline: auto;
+}
+
+.keyboard {
+  margin-top: 20px;
+  margin-bottom: 40px;
 }
 
 .tile {

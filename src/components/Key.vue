@@ -21,7 +21,7 @@ export default defineComponent({
 button {
   border: none;
   border-radius: 10%;
-  background-color: rgb(241, 241, 241);
+  background-color: rgb(223, 223, 223);
   font-size: 30px;
   padding: 10px;
   text-align: center;

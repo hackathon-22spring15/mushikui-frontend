@@ -8,7 +8,7 @@ export default defineComponent({
 
 <template>
   <div class="HeaderContainer">
-    <div>Mushikui</div>
+    <div class="title">Mushikui</div>
     <!-- <div class="TestContainer">test</div> -->
   </div>
 </template>
@@ -17,13 +17,17 @@ export default defineComponent({
 .HeaderContainer {
   display: flex;
   text-align: center;
-  font-size: 30px;
-  border-bottom: solid;
-  border-bottom-color: darkgrey;
+  border-bottom: solid 4px rgb(99, 172, 99);
   height: 60px;
   justify-content: center;
   align-items: center;
   position: relative;
+}
+
+.title {
+  font-size: 50px;
+  font-family: 'Acme', sans-serif;
+  margin-top: 5px;
 }
 
 .TestContainer {

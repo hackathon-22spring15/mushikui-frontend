@@ -521,7 +521,6 @@ export default defineComponent({
   text-transform: uppercase;
   user-select: none;
   background-color: rgb(223, 223, 223);
-  box-shadow: 0 3px 4px rgba(0, 0, 0, 0.32);
 }
 
 .equal {
@@ -592,6 +591,5 @@ export default defineComponent({
 
 .current_input {
   background-color: rgb(84, 84, 84) !important;
-  box-shadow: none !important;
 }
 </style>

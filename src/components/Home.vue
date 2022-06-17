@@ -28,16 +28,17 @@ export default defineComponent({
     const results = ref<Array<Array<string>>>([]);
     const showModal = ref(false);
     const can_input = ref(true);
+    const seed = ref(0);
 
     onBeforeMount(async () => {
       const today = new Date();
-      const date_today =
+      seed.value =
         today.getFullYear() * 10000 +
         (today.getMonth() + 1) * 100 +
         today.getDate();
       try {
         can_input.value = false;
-        const { data } = await apis.getEqualDailyExpressionDateGet(date_today);
+        const { data } = await apis.getEqualDailyExpressionDateGet(seed.value);
         RIGHT_LEN.value = 6 - data.pos;
         LEFT_LEN.value = data.pos;
         lines.value = init_line(LEFT_LEN.value, RIGHT_LEN.value, N_ROW);
@@ -186,14 +187,9 @@ export default defineComponent({
     const check = async (expr: string) => {
       try {
         can_input.value = false;
-        const today = new Date();
-        const date_today =
-          today.getFullYear() * 10000 +
-          (today.getMonth() + 1) * 100 +
-          today.getDate();
         var expre: Expression = { expression: expr };
         var { data } = await apis.postExpressionDailyExpressionDatePost(
-          date_today,
+          seed.value,
           expre
         );
         can_input.value = true;
@@ -335,6 +331,7 @@ export default defineComponent({
       N_ROW,
       showModal,
       transSymbol,
+      seed,
     };
   },
   components: {
@@ -514,7 +511,11 @@ export default defineComponent({
     </div>
   </div>
   <Teleport to="body">
-    <ResultModal :show="showModal" @close="showModal = false"></ResultModal>
+    <ResultModal
+      :show="showModal"
+      :seed="seed"
+      @close="showModal = false"
+    ></ResultModal>
   </Teleport>
 </template>
 

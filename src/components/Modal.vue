@@ -13,8 +13,12 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
+    seed: {
+      type: Number,
+      default: 0,
+    },
   },
-  setup() {
+  setup({ seed }) {
     const date = ref(new Date());
     const answer = ref("");
 
@@ -33,15 +37,8 @@ export default defineComponent({
     };
 
     const getAnswer = async () => {
-      const today = new Date();
-      const date_today =
-        today.getFullYear() * 10000 +
-        (today.getMonth() + 1) * 100 +
-        today.getDate();
       try {
-        const { data } = await apis.getEqualDailyExpressionDateAnswerGet(
-          date_today
-        );
+        const { data } = await apis.getEqualDailyExpressionDateAnswerGet(seed);
         answer.value = data.expression.replace("/", "÷").replace("*", "×");
       } catch (e) {
         console.log(e);

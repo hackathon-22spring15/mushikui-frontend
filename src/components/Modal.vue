@@ -1,32 +1,6 @@
-<template>
-  <Transition name="modal">
-    <div v-if="show" class="modal-mask">
-      <div class="modal-wrapper">
-        <div class="modal-container">
-          <div class="modal-header">
-            <button class="modal-close-button" @click="$emit('close')">
-              x
-            </button>
-          </div>
-          <div class="modal-body">
-            <div name="body">次の問題まで</div>
-            <div class="timer">{{ hours }}:{{ minutes }}:{{ seconds }}</div>
-          </div>
-          <div class="modal-footer">
-            <div name="footer">
-              <button class="modal-share-button" @click="twittersharebutton">
-                share on twitter
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </Transition>
-</template>
-
 <script lang="ts">
 import { computed, defineComponent, onMounted, ref } from "vue";
+import apis, { Expression } from "../lib/apis";
 
 const zeroPadding = (num: number, digit: number) => {
   return (Array(digit).join("0") + num).slice(-digit);
@@ -37,11 +11,12 @@ export default defineComponent({
   props: {
     show: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
   setup() {
     const date = ref(new Date());
+    const answer = ref("");
 
     const hours = computed(() => {
       return zeroPadding(23 - date.value.getHours(), 2);
@@ -57,16 +32,42 @@ export default defineComponent({
       date.value = new Date();
     };
 
+    const getAnswer = async () => {
+      const today = new Date();
+      const date_today =
+        today.getFullYear() * 10000 +
+        (today.getMonth() + 1) * 100 +
+        today.getDate();
+      try {
+        const { data } = await apis.getEqualDailyExpressionDateAnswerGet(
+          date_today
+        );
+        answer.value = data.expression.replace("/", "÷").replace("*", "×");
+      } catch (e) {
+        console.log(e);
+      }
+    };
+
     onMounted(() => {
       setDate();
       setInterval(setDate, 1000);
+      getAnswer();
     });
 
     const TwitterBaseUrl = "https://twitter.com/intent/tweet?";
     const ShareTextBody = ref("いい感じのコメント");
     const ShareTextURL = "https://trap.jp";
     const twittersharebutton = () => {
-      window.open(TwitterBaseUrl.concat("text=",ShareTextBody.value,"%0a","&url=",ShareTextURL),"twitter");
+      window.open(
+        TwitterBaseUrl.concat(
+          "text=",
+          ShareTextBody.value,
+          "%0a",
+          "&url=",
+          ShareTextURL
+        ),
+        "twitter"
+      );
     };
 
     return {
@@ -74,12 +75,60 @@ export default defineComponent({
       minutes,
       seconds,
       twittersharebutton,
+      answer,
     };
-  }
+  },
 });
 </script>
 
+<template>
+  <Transition name="modal">
+    <div v-if="show" class="modal-mask">
+      <div class="modal-wrapper">
+        <div class="modal-container">
+          <div class="modal-header">
+            <button class="modal-close-button" @click="$emit('close')">
+              x
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="answer-container">{{ answer }}</div>
+            <div class="second-container">
+              <div class="timer">
+                <div>次の問題まで</div>
+                <div class="timer">{{ hours }}:{{ minutes }}:{{ seconds }}</div>
+              </div>
+              <button class="modal-share-button" @click="twittersharebutton">
+                share
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </Transition>
+</template>
+
 <style scoped>
+.second-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.timer {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin: auto;
+}
+
+.answer-container {
+  font-size: 3em;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
 .modal-mask {
   position: fixed;
   z-index: 9998;
@@ -122,6 +171,7 @@ export default defineComponent({
 
 .modal-share-button {
   float: center;
+  margin: auto;
 }
 
 /*

@@ -1,32 +1,30 @@
 <script lang="ts">
-import { defineComponent } from "vue"
-
+import { defineComponent } from "vue";
+import { transSymbol } from "../utils";
 
 export default defineComponent({
-    name: "Key",
-    props: ["char", "input"]
-})
-
-
-
-
-
-
+  name: "Key",
+  props: ["char", "input"],
+  setup() {
+    return {
+      transSymbol,
+    };
+  },
+});
 </script>
 
 <template>
-    <button @click="input(char)">{{ char }}</button>
+  <button @click="input(char)">{{ transSymbol(char) }}</button>
 </template>
 
-
 <style scoped>
-button{
-    border: none;
-    border-radius: 10%;
-    background-color: rgb(241, 241, 241);
-    font-size: 30px;
-    padding: 10px;
-    text-align: center;
-    margin: 1px;
+button {
+  border: none;
+  border-radius: 10%;
+  background-color: rgb(241, 241, 241);
+  font-size: 30px;
+  padding: 10px;
+  text-align: center;
+  margin: 1px;
 }
 </style>

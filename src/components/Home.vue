@@ -1,7 +1,13 @@
 <script lang="ts">
 import { defineComponent, ref, computed, version, onBeforeMount } from "vue";
 import Key from "./Key.vue";
+import ResultModal from "./Modal.vue";
 import apis, { Expression } from "../lib/apis";
+import { transSymbol } from "../utils";
+
+const check_finished = (row: Array<string>) => {
+  return row.every((e) => e === "o");
+};
 
 export default defineComponent({
   setup() {
@@ -20,6 +26,7 @@ export default defineComponent({
     const LEFT_LEN = ref(3);
     const lines = ref<Array<{ left: string[]; right: string[] }>>([]);
     const results = ref<Array<Array<string>>>([]);
+    const showModal = ref(false);
 
     onBeforeMount(async () => {
       const today = new Date();
@@ -37,7 +44,7 @@ export default defineComponent({
         console.log(e);
       }
     });
-    
+
     const logKey = (e: KeyboardEvent) => {
       switch (e.key) {
         case "Enter":
@@ -51,7 +58,7 @@ export default defineComponent({
             update(e.key);
           }
       }
-    }
+    };
     window.addEventListener("keydown", logKey);
 
     // left_len, right_len, n_rowから空文字列で初期化された結果を格納する配列を作る
@@ -129,7 +136,6 @@ export default defineComponent({
       return result;
     };
 
-
     // 各値,  演算子についての判定結果を保存する配列
     // 例えば一番最後の要素は / の判定結果を格納
     const result_by_value = ref([
@@ -174,23 +180,23 @@ export default defineComponent({
     });
 
     const check = async (expr: string) => {
-        try {
-          const today = new Date();
-          const date_today =
-            today.getFullYear() * 10000 +
-            (today.getMonth() + 1) * 100 +
-            today.getDate();
-          var expre: Expression = { expression: expr };
-          var { data } = await apis.postExpressionDailyExpressionDatePost(
-            date_today,
-            expre
-          );
-          return data.check;
-        } catch (e) {
-          console.log(e);
-          return [];
-        }
-      };
+      try {
+        const today = new Date();
+        const date_today =
+          today.getFullYear() * 10000 +
+          (today.getMonth() + 1) * 100 +
+          today.getDate();
+        var expre: Expression = { expression: expr };
+        var { data } = await apis.postExpressionDailyExpressionDatePost(
+          date_today,
+          expre
+        );
+        return data.check;
+      } catch (e) {
+        console.log(e);
+        return [];
+      }
+    };
 
     const judge = async (left: string, right: string) => {
       const expr = left + "=" + right;
@@ -278,6 +284,14 @@ export default defineComponent({
           }
         }
 
+        // 終了判定
+        const is_finished = check_finished(results.value[row_idx.value]);
+        console.log(results.value[row_idx.value]);
+        console.log(is_finished);
+        if (is_finished) {
+          showModal.value = true;
+        }
+
         row_idx.value++;
         col_idx.value = 0;
       } else if (col_idx.value > LEFT_LEN.value + RIGHT_LEN.value - 1) {
@@ -312,10 +326,13 @@ export default defineComponent({
       RIGHT_LEN,
       EXPR_LEN,
       N_ROW,
+      showModal,
+      transSymbol,
     };
   },
   components: {
     Key,
+    ResultModal,
   },
 });
 </script>
@@ -334,7 +351,7 @@ export default defineComponent({
         v-for="(element, j) in row.left"
         :key="j"
       >
-        {{ element }}
+        {{ transSymbol(element) }}
       </div>
       <div class="equal">=</div>
       <div
@@ -348,7 +365,7 @@ export default defineComponent({
         v-for="(element, j) in row.right"
         :key="j"
       >
-        {{ element }}
+        {{ transSymbol(element) }}
       </div>
     </div>
   </div>
@@ -489,6 +506,9 @@ export default defineComponent({
       <Key char="return" :input="update"></Key>
     </div>
   </div>
+  <Teleport to="body">
+    <ResultModal :show="showModal" @close="showModal = false"></ResultModal>
+  </Teleport>
 </template>
 
 <style scoped>

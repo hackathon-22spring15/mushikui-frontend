@@ -173,9 +173,7 @@ export default defineComponent({
       return results.value.map((result) => result.map((e) => e === "x"));
     });
 
-    const judge = async (left: string, right: string) => {
-      const expr = left + "=" + right;
-      const check = (async (expr: string) => {
+    const check = async (expr: string) => {
         try {
           const today = new Date();
           const date_today =
@@ -183,32 +181,36 @@ export default defineComponent({
             (today.getMonth() + 1) * 100 +
             today.getDate();
           var expre: Expression = { expression: expr };
-          var response = await apis.postExpressionDailyExpressionDatePost(
+          var { data } = await apis.postExpressionDailyExpressionDatePost(
             date_today,
             expre
           );
-          return response.data.check;
+          return data.check;
         } catch (e) {
           console.log(e);
           return [];
         }
-      })(expr);
+      };
 
-      var a = await check.then((value) => {
-        let res = [];
+    const judge = async (left: string, right: string) => {
+      const expr = left + "=" + right;
+      try {
+        const c = await check(expr);
+        const res = [];
         for (let i = 0; i < LEFT_LEN.value + RIGHT_LEN.value; i++) {
-          if (value[i] === 0) {
+          if (c[i] === 0) {
             res.push("x");
-          } else if (value[i] === 1) {
+          } else if (c[i] === 1) {
             res.push("o");
-          } else if (value[i] === 2) {
+          } else if (c[i] === 2) {
             res.push("h");
           }
         }
         return res;
-      });
-      console.log(a);
-      return a;
+      } catch (e) {
+        console.log(e);
+        return [];
+      }
     };
 
     // 入力に応じて`lines`を更新して、"enter"が押されたらジャッジをする。

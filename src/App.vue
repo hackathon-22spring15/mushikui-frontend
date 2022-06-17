@@ -1,6 +1,6 @@
 <template>
   <Header></Header>
-  <Home></Home>
+  <router-view></router-view>
 </template>
 
 <script lang="ts">

@@ -17,8 +17,12 @@ export default defineComponent({
       type: Number,
       default: 0,
     },
+    rand: {
+      type: Boolean,
+      default: false,
+    },
   },
-  setup({ seed }) {
+  setup({ seed, rand }) {
     const date = ref(new Date());
     const answer = ref("");
 
@@ -38,8 +42,17 @@ export default defineComponent({
 
     const getAnswer = async () => {
       try {
-        const { data } = await apis.getEqualDailyExpressionDateAnswerGet(seed);
-        answer.value = data.expression.replace("/", "÷").replace("*", "×");
+        if (rand) {
+          const { data } = await apis.getEqualRandomExpressionRandomSeedAnswerGet(
+            seed
+          );
+          answer.value = data.expression.replace("/", "÷").replace("*", "×");
+        } else {
+          const { data } = await apis.getEqualDailyExpressionDateAnswerGet(
+            seed
+          );
+          answer.value = data.expression.replace("/", "÷").replace("*", "×");
+        }
       } catch (e) {
         console.log(e);
       }

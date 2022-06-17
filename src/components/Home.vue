@@ -1,31 +1,42 @@
 <script lang="ts">
-import { defineComponent, ref, computed, version } from "vue";
+import { defineComponent, ref, computed, version, onBeforeMount } from "vue";
 import Key from "./Key.vue";
 import apis, { Expression } from "../lib/apis";
 
-const today = new Date();
-
-const date_today =
-  today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
-
-var pos = await apis.getEqualDailyExpressionDateGet(date_today);
-
 export default defineComponent({
   setup() {
-    // イコールの右側にある枠の数
-    const RIGHT_LEN = 6 - pos.data["pos"];
-    // イコールの左側にある枠の数
-    const LEFT_LEN = pos.data["pos"];
     // 行の数
     const N_ROW = 5;
 
     // イコールを含めた式の要素の数
-    const EXPR_LEN = LEFT_LEN + RIGHT_LEN + 1;
+    const EXPR_LEN = 7;
 
     // 現在入力中の枠が何行目か
     const row_idx = ref(0);
     // 現在入力中の枠が何列目か
     const col_idx = ref(0);
+
+    const RIGHT_LEN = ref(3);
+    const LEFT_LEN = ref(3);
+    const lines = ref<Array<{ left: string[]; right: string[] }>>([]);
+    const results = ref<Array<Array<string>>>([]);
+
+    onBeforeMount(async () => {
+      const today = new Date();
+      const date_today =
+        today.getFullYear() * 10000 +
+        (today.getMonth() + 1) * 100 +
+        today.getDate();
+      try {
+        const { data } = await apis.getEqualDailyExpressionDateGet(date_today);
+        RIGHT_LEN.value = 6 - data.pos;
+        LEFT_LEN.value = data.pos;
+        lines.value = init_line(LEFT_LEN.value, RIGHT_LEN.value, N_ROW);
+        results.value = init_result(LEFT_LEN.value, RIGHT_LEN.value, N_ROW);
+      } catch (e) {
+        console.log(e);
+      }
+    });
 
     // left_len, right_len, n_rowから空文字列で初期化された結果を格納する配列を作る
     //
@@ -75,7 +86,7 @@ export default defineComponent({
         });
       }
       return result;
-    }
+    };
 
     // 判定の結果を格納する空文字列で初期化された二次元配列を生成する
     // 例:init_result(3, 3, 5) ->
@@ -100,10 +111,8 @@ export default defineComponent({
         result.push(_row);
       }
       return result;
-    }
+    };
 
-    const lines = ref(init_line(LEFT_LEN, RIGHT_LEN, N_ROW));
-    const results = ref(init_result(LEFT_LEN, RIGHT_LEN, N_ROW));
 
     // 各値,  演算子についての判定結果を保存する配列
     // 例えば一番最後の要素は / の判定結果を格納
@@ -149,9 +158,14 @@ export default defineComponent({
     });
 
     const judge = async (left: string, right: string) => {
-      let expr = left.concat("=", right);
+      const expr = left + "=" + right;
       const check = (async (expr: string) => {
         try {
+          const today = new Date();
+          const date_today =
+            today.getFullYear() * 10000 +
+            (today.getMonth() + 1) * 100 +
+            today.getDate();
           var expre: Expression = { expression: expr };
           var response = await apis.postExpressionDailyExpressionDatePost(
             date_today,
@@ -166,7 +180,7 @@ export default defineComponent({
 
       var a = await check.then((value) => {
         let res = [];
-        for (let i = 0; i < LEFT_LEN + RIGHT_LEN; i++) {
+        for (let i = 0; i < LEFT_LEN.value + RIGHT_LEN.value; i++) {
           if (value[i] === 0) {
             res.push("x");
           } else if (value[i] === 1) {
@@ -179,7 +193,7 @@ export default defineComponent({
       });
       console.log(a);
       return a;
-    }
+    };
 
     // 入力に応じて`lines`を更新して、"enter"が押されたらジャッジをする。
     const update = async (char: string) => {
@@ -188,28 +202,29 @@ export default defineComponent({
         if (col_idx.value === 0) {
           return;
         }
-        if (col_idx.value - 1 > LEFT_LEN - 1) {
-          lines.value[row_idx.value].right[col_idx.value - (LEFT_LEN + 1)] =
-            "";
+        if (col_idx.value - 1 > LEFT_LEN.value - 1) {
+          lines.value[row_idx.value].right[
+            col_idx.value - (LEFT_LEN.value + 1)
+          ] = "";
         } else {
           lines.value[row_idx.value].left[col_idx.value - 1] = "";
         }
         col_idx.value--;
       } else if (char === "return") {
         // 入力しきっていない場合はalertを出す
-        if (col_idx.value !== LEFT_LEN + RIGHT_LEN) {
+        if (col_idx.value !== LEFT_LEN.value + RIGHT_LEN.value) {
           alert("please input all");
           return;
         }
 
         // ジャッジする
         results.value[row_idx.value] = await judge(
-          lines.value[row_idx.value].left.join(''),
-          lines.value[row_idx.value].right.join('')
+          lines.value[row_idx.value].left.join(""),
+          lines.value[row_idx.value].right.join("")
         );
 
         // ジャッジ結果をresult_by_valueに代入していく。
-        for (let i = 0; i < LEFT_LEN; i++) {
+        for (let i = 0; i < LEFT_LEN.value; i++) {
           const v = lines.value[row_idx.value].left[i];
           if (v === "+") {
             result_by_value.value[10] = results.value[row_idx.value][i];
@@ -225,41 +240,42 @@ export default defineComponent({
           }
         }
 
-        for (let i = 0; i < RIGHT_LEN; i++) {
+        for (let i = 0; i < RIGHT_LEN.value; i++) {
           const v = lines.value[row_idx.value].right[i];
           if (v === "+") {
             result_by_value.value[10] =
-              results.value[row_idx.value][i + LEFT_LEN];
+              results.value[row_idx.value][i + LEFT_LEN.value];
           } else if (v === "-") {
             result_by_value.value[11] =
-              results.value[row_idx.value][i + LEFT_LEN];
+              results.value[row_idx.value][i + LEFT_LEN.value];
           } else if (v === "*") {
             result_by_value.value[12] =
-              results.value[row_idx.value][i + LEFT_LEN];
+              results.value[row_idx.value][i + LEFT_LEN.value];
           } else if (v === "/") {
             result_by_value.value[13] =
-              results.value[row_idx.value][i + LEFT_LEN];
+              results.value[row_idx.value][i + LEFT_LEN.value];
           } else {
             result_by_value.value[parseInt(v)] =
-              results.value[row_idx.value][i + LEFT_LEN];
+              results.value[row_idx.value][i + LEFT_LEN.value];
           }
         }
 
         row_idx.value++;
         col_idx.value = 0;
-      } else if (col_idx.value > LEFT_LEN + RIGHT_LEN - 1) {
+      } else if (col_idx.value > LEFT_LEN.value + RIGHT_LEN.value - 1) {
         // すでに入力しきっているのにさらに入力が来た場合。 なのでスキップ
         return;
       } else {
         // 正しい入力
-        if (col_idx.value > LEFT_LEN - 1) {
-          lines.value[row_idx.value].right[col_idx.value - LEFT_LEN] = char;
+        if (col_idx.value > LEFT_LEN.value - 1) {
+          lines.value[row_idx.value].right[col_idx.value - LEFT_LEN.value] =
+            char;
         } else {
           lines.value[row_idx.value].left[col_idx.value] = char;
         }
         col_idx.value++;
       }
-    }
+    };
 
     return {
       lines,

@@ -27,6 +27,7 @@ export default defineComponent({
     const lines = ref<Array<{ left: string[]; right: string[] }>>([]);
     const results = ref<Array<Array<string>>>([]);
     const showModal = ref(false);
+    const can_input = ref(true);
 
     onBeforeMount(async () => {
       const today = new Date();
@@ -35,6 +36,7 @@ export default defineComponent({
         (today.getMonth() + 1) * 100 +
         today.getDate();
       try {
+        can_input.value = false;
         const { data } = await apis.getEqualDailyExpressionDateGet(date_today);
         RIGHT_LEN.value = 6 - data.pos;
         LEFT_LEN.value = data.pos;
@@ -43,9 +45,11 @@ export default defineComponent({
       } catch (e) {
         console.log(e);
       }
+      can_input.value = true;
     });
 
     const logKey = (e: KeyboardEvent) => {
+      if (!can_input.value) return;
       switch (e.key) {
         case "Enter":
           update("return");
@@ -181,6 +185,7 @@ export default defineComponent({
 
     const check = async (expr: string) => {
       try {
+        can_input.value = false;
         const today = new Date();
         const date_today =
           today.getFullYear() * 10000 +
@@ -191,9 +196,11 @@ export default defineComponent({
           date_today,
           expre
         );
+        can_input.value = true;
         return data.check;
       } catch (e) {
         console.log(e);
+        can_input.value = true;
         return [];
       }
     };
@@ -286,10 +293,10 @@ export default defineComponent({
 
         // 終了判定
         const is_finished = check_finished(results.value[row_idx.value]);
-        console.log(results.value[row_idx.value]);
-        console.log(is_finished);
-        if (is_finished) {
+        if (is_finished || row_idx.value === N_ROW - 1) {
           showModal.value = true;
+          row_idx.value = 100;
+          can_input.value = false;
         }
 
         row_idx.value++;

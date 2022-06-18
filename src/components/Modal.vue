@@ -27,7 +27,7 @@ export default defineComponent({
     },
   },
 
-  setup({ seed, rand, resl }) {
+  setup({ seed, rand }) {
     const date = ref(new Date());
     const answer = ref("");
 
@@ -68,7 +68,6 @@ export default defineComponent({
       setInterval(setDate, 1000);
       getAnswer();
     });
-
     const TwitterBaseUrl = "https://twitter.com/intent/tweet?";
     const ShareTextBody = ref("いい感じのコメント");
     const ShareTextURL = "https://trap.jp";
@@ -84,7 +83,8 @@ export default defineComponent({
         "twitter"
       );
     };
-    const logg=()=>{
+    
+    const logg = (resl: string[][]) => {
       console.log(resl);
       resl.forEach((resl2)=>{
         resl2.forEach((resl3)=>{
@@ -123,7 +123,7 @@ export default defineComponent({
                 <div>次の問題まで</div>
                 <div class="timer">{{ hours }}:{{ minutes }}:{{ seconds }}</div>
               </div>
-              <button class="buton" @click="logg">log</button>
+              <button class="buton" @click="logg(resl);">log</button>
               <button class="modal-share-button" @click="twittersharebutton">
                 share
               </button>

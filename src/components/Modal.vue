@@ -98,12 +98,19 @@ export default defineComponent({
     };
     const makesharebody = (equl: Number, resl: Number[][], ent: string, rand: boolean, seed: number) => {
       ShareTextBody.value = "Mushikui";
+      
       const seedTxt = seed.toString();
-      if (rand) {
-        ShareTextBody.value += " " + seedTxt;
-      } else {
-        ShareTextBody.value += " " + seedTxt.slice(0, 4) + "-" + seedTxt.slice(4, 6) + "-" + seedTxt.slice(6, 8);
+      const probDate = new Date(parseInt(seedTxt.substring(0, 4)), parseInt(seedTxt.substring(4, 6)) - 1, parseInt(seedTxt.substring(6, 8)));
+      const startData = new Date(2022, 5, 19);
+      const days = Math.floor((probDate.getTime() - startData.getTime()) / (1000 * 60 * 60 * 24));
+
+      if (!rand) {
+        ShareTextBody.value += " " + days;
       }
+
+      const compNum = (resl.length < 5) ? resl.length.toString() : (resl[4].every(x => x === 2)) ? "5" : "x";
+      ShareTextBody.value += " " + compNum + "/5";
+
       ShareTextBody.value += ent;
       let flg = false;
       console.log(resl);

@@ -5,7 +5,7 @@ import ResultModal from "./Modal.vue";
 import apis, { Expression } from "../lib/apis";
 import { transSymbol } from "../utils";
 import { useToast } from "vue-toastification";
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router';
 
 const check_finished = (row: Array<number>) => {
   return row.every((e) => e === 2);
@@ -33,12 +33,10 @@ export default defineComponent({
     const seed = ref(0);
     const toast = useToast();
     const route = useRoute();
-    // const { seeds } = route.params;
-    // seed.value = Number(seeds);
 
     onBeforeMount(async () => {
-      const { seeds } = route.params
-      seed.value = Number(seeds)
+      const { seeds } = route.params;
+      seed.value = Number(seeds);
       try {
         can_input.value = false;
         const { data } = await apis.getEqualRandomExpressionRandomSeedGet(

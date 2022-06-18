@@ -6,8 +6,8 @@ import apis, { Expression } from "../lib/apis";
 import { transSymbol } from "../utils";
 import { globalCookiesConfig, useCookies } from "vue3-cookies";
 
-const check_finished = (row: Array<string>) => {
-  return row.every((e) => e === "o");
+const check_finished = (row: Array<number>) => {
+  return row.every((e) => e === 2);
 };
 
 globalCookiesConfig({
@@ -34,7 +34,7 @@ export default defineComponent({
     const RIGHT_LEN = ref(3);
     const LEFT_LEN = ref(3);
     const lines = ref<Array<{ left: string[]; right: string[] }>>([]);
-    const results = ref<Array<Array<string>>>([]);
+    const results = ref<Array<Array<number>>>([]);
     const showModal = ref(false);
     const can_input = ref(true);
     const seed = ref(0);
@@ -152,12 +152,12 @@ export default defineComponent({
       left_len: number,
       right_len: number,
       n_row: number
-    ): Array<Array<string>> => {
+    ): Array<Array<number>> => {
       let result = [];
       for (let i = 0; i < n_row; i++) {
         let _row = [];
         for (let j = 0; j < left_len + right_len; j++) {
-          _row.push("");
+          _row.push(-1);
         }
         result.push(_row);
       }
@@ -167,44 +167,44 @@ export default defineComponent({
     // 各値,  演算子についての判定結果を保存する配列
     // 例えば一番最後の要素は / の判定結果を格納
     const result_by_value = ref([
-      "", // 0
-      "", // 1
-      "", // 2
-      "", // 3
-      "", // 4
-      "", // 5
-      "", // 6
-      "", // 7
-      "", // 8
-      "", // 9
-      "", // +
-      "", // -
-      "", // *
-      "", // /
+      -1, // 0
+      -1, // 1
+      -1, // 2
+      -1, // 3
+      -1, // 4
+      -1, // 5
+      -1, // 6
+      -1, // 7
+      -1, // 8
+      -1, // 9
+      -1, // +
+      -1, // -
+      -1, // *
+      -1, // /
     ]);
 
     const isCorrect_by_value = computed(() => {
-      return result_by_value.value.map((e) => e === "o");
+      return result_by_value.value.map((e) => e === 2);
     });
 
     const isHalfCorrect_by_value = computed(() => {
-      return result_by_value.value.map((e) => e === "h");
+      return result_by_value.value.map((e) => e === 1);
     });
 
     const isNotCorrect_by_value = computed(() => {
-      return result_by_value.value.map((e) => e === "x");
+      return result_by_value.value.map((e) => e === 0);
     });
 
     const isCorrect = computed(() => {
-      return results.value.map((result) => result.map((e) => e === "o"));
+      return results.value.map((result) => result.map((e) => e === 2));
     });
 
     const isHalfCorrect = computed(() => {
-      return results.value.map((result) => result.map((e) => e === "h"));
+      return results.value.map((result) => result.map((e) => e === 1));
     });
 
     const isNotCorrect = computed(() => {
-      return results.value.map((result) => result.map((e) => e === "x"));
+      return results.value.map((result) => result.map((e) => e === 0));
     });
 
     const check = async (expr: string) => {
@@ -230,13 +230,7 @@ export default defineComponent({
         const c = await check(expr);
         const res = [];
         for (let i = 0; i < LEFT_LEN.value + RIGHT_LEN.value; i++) {
-          if (c[i] === 0) {
-            res.push("x");
-          } else if (c[i] === 1) {
-            res.push("o");
-          } else if (c[i] === 2) {
-            res.push("h");
-          }
+          res.push(c[i]);
         }
         return res;
       } catch (e) {
@@ -281,16 +275,16 @@ export default defineComponent({
         for (let i = 0; i < LEFT_LEN.value; i++) {
           const v = lines.value[row_idx.value].left[i];
           if (v === "+") {
-            result_by_value.value[10] = results.value[row_idx.value][i];
+            result_by_value.value[10] = Math.max(result_by_value.value[10], results.value[row_idx.value][i]);
           } else if (v === "-") {
-            result_by_value.value[11] = results.value[row_idx.value][i];
+            result_by_value.value[11] = Math.max(result_by_value.value[11], results.value[row_idx.value][i]);
           } else if (v === "*") {
-            result_by_value.value[12] = results.value[row_idx.value][i];
+            result_by_value.value[12] = Math.max(result_by_value.value[12], results.value[row_idx.value][i]);
           } else if (v === "/") {
-            result_by_value.value[13] = results.value[row_idx.value][i];
+            result_by_value.value[13] = Math.max(result_by_value.value[13], results.value[row_idx.value][i]);
           } else {
             result_by_value.value[parseInt(v)] =
-              results.value[row_idx.value][i];
+              Math.max(result_by_value.value[parseInt(v)], results.value[row_idx.value][i]);
           }
         }
 
@@ -298,19 +292,19 @@ export default defineComponent({
           const v = lines.value[row_idx.value].right[i];
           if (v === "+") {
             result_by_value.value[10] =
-              results.value[row_idx.value][i + LEFT_LEN.value];
+              Math.max(result_by_value.value[10], results.value[row_idx.value][i + LEFT_LEN.value]);
           } else if (v === "-") {
             result_by_value.value[11] =
-              results.value[row_idx.value][i + LEFT_LEN.value];
+              Math.max(result_by_value.value[11], results.value[row_idx.value][i + LEFT_LEN.value]);
           } else if (v === "*") {
             result_by_value.value[12] =
-              results.value[row_idx.value][i + LEFT_LEN.value];
+              Math.max(result_by_value.value[12], results.value[row_idx.value][i + LEFT_LEN.value]);
           } else if (v === "/") {
             result_by_value.value[13] =
-              results.value[row_idx.value][i + LEFT_LEN.value];
+              Math.max(result_by_value.value[13], results.value[row_idx.value][i + LEFT_LEN.value]);
           } else {
             result_by_value.value[parseInt(v)] =
-              results.value[row_idx.value][i + LEFT_LEN.value];
+              Math.max(result_by_value.value[parseInt(v)], results.value[row_idx.value][i + LEFT_LEN.value]);
           }
         }
 

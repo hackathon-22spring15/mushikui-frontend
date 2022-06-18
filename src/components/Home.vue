@@ -56,6 +56,7 @@ export default defineComponent({
           update("return");
           break;
         case "Backspace":
+        case "Delete":
           update("delete");
           break;
         default:

@@ -2,7 +2,6 @@
 import { computed, defineComponent, onMounted, PropType, ref } from "vue";
 import apis, { Expression } from "../lib/apis";
 import { useToast } from "vue-toastification";
-import POSITION from 'vue-toastification';
 
 const zeroPadding = (num: number, digit: number) => {
   return (Array(digit).join("0") + num).slice(-digit);
@@ -58,12 +57,16 @@ export default defineComponent({
           ShareTextURL = "https://mushikui.trasta.dev/random/" + seed;
           const { data } =
             await apis.getEqualRandomExpressionRandomSeedAnswerGet(seed);
-          answer.value = data.expression.replaceAll("/", "÷").replaceAll("*", "×");
+          answer.value = data.expression
+            .replaceAll("/", "÷")
+            .replaceAll("*", "×");
         } else {
           const { data } = await apis.getEqualDailyExpressionDateAnswerGet(
             seed
           );
-          answer.value = data.expression.replaceAll("/", "÷").replaceAll("*", "×");
+          answer.value = data.expression
+            .replaceAll("/", "÷")
+            .replaceAll("*", "×");
         }
       } catch (e) {
         console.log(e);
@@ -97,19 +100,36 @@ export default defineComponent({
         toast.error("cannot copy");
       }
     };
-    const makesharebody = (equl: Number, resl: Number[][], ent: string, rand: boolean, seed: number) => {
+    const makesharebody = (
+      equl: Number,
+      resl: Number[][],
+      ent: string,
+      rand: boolean,
+      seed: number
+    ) => {
       ShareTextBody.value = "Mushikui";
-      
+
       const seedTxt = seed.toString();
-      const probDate = new Date(parseInt(seedTxt.substring(0, 4)), parseInt(seedTxt.substring(4, 6)) - 1, parseInt(seedTxt.substring(6, 8)));
+      const probDate = new Date(
+        parseInt(seedTxt.substring(0, 4)),
+        parseInt(seedTxt.substring(4, 6)) - 1,
+        parseInt(seedTxt.substring(6, 8))
+      );
       const startData = new Date(2022, 5, 19);
-      const days = Math.floor((probDate.getTime() - startData.getTime()) / (1000 * 60 * 60 * 24));
+      const days = Math.floor(
+        (probDate.getTime() - startData.getTime()) / (1000 * 60 * 60 * 24)
+      );
 
       if (!rand) {
         ShareTextBody.value += " " + days;
       }
 
-      const compNum = (resl.length < 5) ? resl.length.toString() : (resl[4].every(x => x === 2)) ? "5" : "x";
+      const compNum =
+        resl.length < 5
+          ? resl.length.toString()
+          : resl[4].every((x) => x === 2)
+          ? "5"
+          : "x";
       ShareTextBody.value += " " + compNum + "/5";
 
       ShareTextBody.value += ent;

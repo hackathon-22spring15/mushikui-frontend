@@ -75,7 +75,7 @@ export default defineComponent({
     });
     const TwitterBaseUrl = "https://twitter.com/intent/tweet?";
     const ShareTextBody = ref("");
-    var ShareTextURL = "https://mushikui.trasta.dev";
+    let ShareTextURL = "https://mushikui.trasta.dev";
     const twittersharebutton = () => {
       window.open(
         TwitterBaseUrl.concat(

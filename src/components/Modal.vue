@@ -18,7 +18,7 @@ export default defineComponent({
       default: 0,
     },
     resl: {
-      type: Array<Array<string>>,
+      type: Array<Array<number>>,
       default: [[]],
     },
     equl: {
@@ -93,20 +93,20 @@ export default defineComponent({
         alert("fail to copy")
       }
     }
-    const makesharebody = (equl:Number ,resl: string[][], ent: string) => {
+    const makesharebody = (equl:Number ,resl: number[][], ent: string) => {
       ShareTextBody.value="Mushikui"+ent;
       let flg=false;
       console.log(resl);
       resl.forEach((resl2)=>{
         flg=true;
         resl2.forEach((resl3,ind)=>{
-          if(resl3==="x"){
+          if(resl3===2){
             if(ind===equl) ShareTextBody.value+="=";
             ShareTextBody.value+="⬜";
-          }else if(resl3==="h"){
+          }else if(resl3===1){
             if(ind===equl) ShareTextBody.value+="=";
             ShareTextBody.value+="🟨";
-          }else if(resl3==="o"){
+          }else if(resl3===0){
             if(ind===equl) ShareTextBody.value+="=";
             ShareTextBody.value+="🟩";
           }else{

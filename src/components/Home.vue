@@ -5,9 +5,10 @@ import ResultModal from "./Modal.vue";
 import apis, { Expression } from "../lib/apis";
 import { transSymbol } from "../utils";
 import { globalCookiesConfig, useCookies } from "vue3-cookies";
+import { useToast } from "vue-toastification";
 
-const check_finished = (row: Array<string>) => {
-  return row.every((e) => e === "o");
+const check_finished = (row: Array<number>) => {
+  return row.every((e) => e === 2);
 };
 
 globalCookiesConfig({
@@ -34,11 +35,12 @@ export default defineComponent({
     const RIGHT_LEN = ref(3);
     const LEFT_LEN = ref(3);
     const lines = ref<Array<{ left: string[]; right: string[] }>>([]);
-    const results = ref<Array<Array<string>>>([]);
+    const results = ref<Array<Array<number>>>([]);
     const showModal = ref(false);
     const can_input = ref(true);
     const seed = ref(0);
     const { cookies } = useCookies();
+    const toast = useToast();
 
     onBeforeMount(async () => {
       const today = new Date();
@@ -67,9 +69,9 @@ export default defineComponent({
         lines.value = state.lines;
         result_by_value.value = state.result_by_value;
       }
-      if (row_idx.value > N_ROW){
-            showModal.value = true;
-            can_input.value = false;
+      if (row_idx.value > N_ROW) {
+        showModal.value = true;
+        can_input.value = false;
       }
     });
 
@@ -154,12 +156,12 @@ export default defineComponent({
       left_len: number,
       right_len: number,
       n_row: number
-    ): Array<Array<string>> => {
+    ): Array<Array<number>> => {
       let result = [];
       for (let i = 0; i < n_row; i++) {
         let _row = [];
         for (let j = 0; j < left_len + right_len; j++) {
-          _row.push("");
+          _row.push(-1);
         }
         result.push(_row);
       }
@@ -169,44 +171,44 @@ export default defineComponent({
     // 各値,  演算子についての判定結果を保存する配列
     // 例えば一番最後の要素は / の判定結果を格納
     const result_by_value = ref([
-      "", // 0
-      "", // 1
-      "", // 2
-      "", // 3
-      "", // 4
-      "", // 5
-      "", // 6
-      "", // 7
-      "", // 8
-      "", // 9
-      "", // +
-      "", // -
-      "", // *
-      "", // /
+      -1, // 0
+      -1, // 1
+      -1, // 2
+      -1, // 3
+      -1, // 4
+      -1, // 5
+      -1, // 6
+      -1, // 7
+      -1, // 8
+      -1, // 9
+      -1, // +
+      -1, // -
+      -1, // *
+      -1, // /
     ]);
 
     const isCorrect_by_value = computed(() => {
-      return result_by_value.value.map((e) => e === "o");
+      return result_by_value.value.map((e) => e === 2);
     });
 
     const isHalfCorrect_by_value = computed(() => {
-      return result_by_value.value.map((e) => e === "h");
+      return result_by_value.value.map((e) => e === 1);
     });
 
     const isNotCorrect_by_value = computed(() => {
-      return result_by_value.value.map((e) => e === "x");
+      return result_by_value.value.map((e) => e === 0);
     });
 
     const isCorrect = computed(() => {
-      return results.value.map((result) => result.map((e) => e === "o"));
+      return results.value.map((result) => result.map((e) => e === 2));
     });
 
     const isHalfCorrect = computed(() => {
-      return results.value.map((result) => result.map((e) => e === "h"));
+      return results.value.map((result) => result.map((e) => e === 1));
     });
 
     const isNotCorrect = computed(() => {
-      return results.value.map((result) => result.map((e) => e === "x"));
+      return results.value.map((result) => result.map((e) => e === 0));
     });
 
     const check = async (expr: string) => {
@@ -232,13 +234,7 @@ export default defineComponent({
         const c = await check(expr);
         const res = [];
         for (let i = 0; i < LEFT_LEN.value + RIGHT_LEN.value; i++) {
-          if (c[i] === 0) {
-            res.push("x");
-          } else if (c[i] === 1) {
-            res.push("o");
-          } else if (c[i] === 2) {
-            res.push("h");
-          }
+          res.push(c[i]);
         }
         return res;
       } catch (e) {
@@ -265,62 +261,94 @@ export default defineComponent({
       } else if (char === "return") {
         // 入力しきっていない場合はalertを出す
         if (col_idx.value !== LEFT_LEN.value + RIGHT_LEN.value) {
-          alert("please input all");
+          toast.error("please input all");
+          return;
+        }
+
+        const left = lines.value[row_idx.value].left.join("");
+        const right = lines.value[row_idx.value].right.join("");
+        try {
+          if (eval(left) !== eval(right)) {
+            toast.error("Enter the correct equation");
+            return;
+          }
+        } catch (e) {
           return;
         }
 
         // ジャッジする
-        results.value[row_idx.value] = await judge(
-          lines.value[row_idx.value].left.join(""),
-          lines.value[row_idx.value].right.join("")
-        );
+        results.value[row_idx.value] = await judge(left, right);
 
         // ジャッジ結果をresult_by_valueに代入していく。
         for (let i = 0; i < LEFT_LEN.value; i++) {
           const v = lines.value[row_idx.value].left[i];
           if (v === "+") {
-            result_by_value.value[10] = results.value[row_idx.value][i];
+            result_by_value.value[10] = Math.max(
+              result_by_value.value[10],
+              results.value[row_idx.value][i]
+            );
           } else if (v === "-") {
-            result_by_value.value[11] = results.value[row_idx.value][i];
+            result_by_value.value[11] = Math.max(
+              result_by_value.value[11],
+              results.value[row_idx.value][i]
+            );
           } else if (v === "*") {
-            result_by_value.value[12] = results.value[row_idx.value][i];
+            result_by_value.value[12] = Math.max(
+              result_by_value.value[12],
+              results.value[row_idx.value][i]
+            );
           } else if (v === "/") {
-            result_by_value.value[13] = results.value[row_idx.value][i];
+            result_by_value.value[13] = Math.max(
+              result_by_value.value[13],
+              results.value[row_idx.value][i]
+            );
           } else {
-            result_by_value.value[parseInt(v)] =
-              results.value[row_idx.value][i];
+            result_by_value.value[parseInt(v)] = Math.max(
+              result_by_value.value[parseInt(v)],
+              results.value[row_idx.value][i]
+            );
           }
         }
 
         for (let i = 0; i < RIGHT_LEN.value; i++) {
           const v = lines.value[row_idx.value].right[i];
           if (v === "+") {
-            result_by_value.value[10] =
-              results.value[row_idx.value][i + LEFT_LEN.value];
+            result_by_value.value[10] = Math.max(
+              result_by_value.value[10],
+              results.value[row_idx.value][i + LEFT_LEN.value]
+            );
           } else if (v === "-") {
-            result_by_value.value[11] =
-              results.value[row_idx.value][i + LEFT_LEN.value];
+            result_by_value.value[11] = Math.max(
+              result_by_value.value[11],
+              results.value[row_idx.value][i + LEFT_LEN.value]
+            );
           } else if (v === "*") {
-            result_by_value.value[12] =
-              results.value[row_idx.value][i + LEFT_LEN.value];
+            result_by_value.value[12] = Math.max(
+              result_by_value.value[12],
+              results.value[row_idx.value][i + LEFT_LEN.value]
+            );
           } else if (v === "/") {
-            result_by_value.value[13] =
-              results.value[row_idx.value][i + LEFT_LEN.value];
+            result_by_value.value[13] = Math.max(
+              result_by_value.value[13],
+              results.value[row_idx.value][i + LEFT_LEN.value]
+            );
           } else {
-            result_by_value.value[parseInt(v)] =
-              results.value[row_idx.value][i + LEFT_LEN.value];
+            result_by_value.value[parseInt(v)] = Math.max(
+              result_by_value.value[parseInt(v)],
+              results.value[row_idx.value][i + LEFT_LEN.value]
+            );
           }
         }
 
         // 終了判定
         const is_finished = check_finished(results.value[row_idx.value]);
-        if (is_finished){
-          const win =  parseInt(cookies.get("Win"));
+        if (is_finished) {
+          const win = parseInt(cookies.get("Win"));
           cookies.set("Win", String(win + 1));
           showModal.value = true;
           row_idx.value = 100;
           can_input.value = false;
-        }else if (row_idx.value === N_ROW - 1) {
+        } else if (row_idx.value === N_ROW - 1) {
           const lose = parseInt(cookies.get("Lose"));
           cookies.set("Lose", String(lose + 1));
           showModal.value = true;
@@ -343,7 +371,14 @@ export default defineComponent({
         }
         col_idx.value++;
       }
-      const state = {"date": seed.value, "row_idx": row_idx.value, "col_idx": col_idx.value, "results": results.value, "lines": lines.value, "result_by_value": result_by_value.value};
+      const state = {
+        date: seed.value,
+        row_idx: row_idx.value,
+        col_idx: col_idx.value,
+        results: results.value,
+        lines: lines.value,
+        result_by_value: result_by_value.value,
+      };
       cookies.set("user_state", JSON.stringify(state));
     };
 
@@ -551,6 +586,7 @@ export default defineComponent({
       :show="showModal"
       :seed="seed"
       :resl="results"
+      :equl="LEFT_LEN"
       @close="showModal = false"
     ></ResultModal>
   </Teleport>
@@ -593,6 +629,7 @@ export default defineComponent({
   text-transform: uppercase;
   user-select: none;
   background-color: rgb(223, 223, 223);
+  border-radius: 5px;
 }
 
 .equal {
@@ -662,6 +699,12 @@ export default defineComponent({
 }
 
 .current_input {
-  background-color: rgb(84, 84, 84) !important;
+  border: 5px solid rgb(40, 40, 40);
+}
+</style>
+
+<style>
+.Vue-Toastification__toast-body {
+  text-align: center !important;
 }
 </style>

@@ -58,21 +58,16 @@ export default defineComponent({
       }
       can_input.value = true;
       var state = JSON.parse(JSON.stringify(cookies.get("user_state")));
-      // {"date": seed, "value": {"row_idx": row_idx, "col_idx": col_idx, "results": results, "lines": lines}}
-      console.log(state)
-      console.log(state.date)
-      console.log(state.date._value)
-      if (state.date._value === seed.value){
-        row_idx.value = state.value.row_idx._value;
-        col_idx.value = state.value.col_idx._value;
-        results.value = state.value.results._value;
-        lines.value = state.value.lines._value;
+      if (state.date === seed.value){
+        row_idx.value = state.row_idx;
+        col_idx.value = state.col_idx;
+        results.value = state.results;
+        lines.value = state.lines;
+        result_by_value.value = state.result_by_value;
       }
-      const is_finished = check_finished(results.value[row_idx.value]);
-      if (is_finished || row_idx.value === N_ROW - 1){
-          showModal.value = true;
-          row_idx.value = 100;
-          can_input.value = false;
+      if (row_idx.value > N_ROW){
+            showModal.value = true;
+            can_input.value = false;
       }
     });
 
@@ -346,7 +341,7 @@ export default defineComponent({
         }
         col_idx.value++;
       }
-      var state = {"date": seed, "value": {"row_idx": row_idx, "col_idx": col_idx, "results": results, "lines": lines}};
+      var state = {"date": seed.value, "row_idx": row_idx.value, "col_idx": col_idx.value, "results": results.value, "lines": lines.value, "result_by_value": result_by_value.value};
       cookies.set("user_state", JSON.stringify(state));
     };
 

@@ -190,17 +190,14 @@ export default defineComponent({
 
     const check = async (expr: string) => {
       try {
-        can_input.value = false;
         var expre: Expression = { expression: expr };
         var { data } = await apis.postExpressionRandomExpressionRandomSeedPost(
           seed.value,
           expre
         );
-        can_input.value = true;
         return data.check;
       } catch (e) {
         console.log(e);
-        can_input.value = true;
         return [];
       }
     };
@@ -255,6 +252,8 @@ export default defineComponent({
         } catch (e) {
           return;
         }
+
+        can_input.value = false;
 
         // ジャッジする
         const data = await judge(left, right);
@@ -330,10 +329,11 @@ export default defineComponent({
           showModal.value = true;
           row_idx.value = 100;
           can_input.value = false;
+        } else {
+          row_idx.value++;
+          col_idx.value = 0;
+          can_input.value = true;
         }
-
-        row_idx.value++;
-        col_idx.value = 0;
       } else if (col_idx.value > LEFT_LEN.value + RIGHT_LEN.value - 1) {
         // すでに入力しきっているのにさらに入力が来た場合。 なのでスキップ
         return;

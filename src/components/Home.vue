@@ -60,9 +60,9 @@ export default defineComponent({
       }
       can_input.value = true;
       var state = JSON.parse(JSON.stringify(cookies.get("user_state")));
-      if(state.date === null){
-        state.date = 0
-      } else if (state.date === seed.value){
+      if (state.date === null) {
+        state.date = 0;
+      } else if (state.date === seed.value) {
         row_idx.value = state.row_idx;
         col_idx.value = state.col_idx;
         results.value = state.results;
@@ -213,17 +213,14 @@ export default defineComponent({
 
     const check = async (expr: string) => {
       try {
-        can_input.value = false;
         var expre: Expression = { expression: expr };
         var { data } = await apis.postExpressionDailyExpressionDatePost(
           seed.value,
           expre
         );
-        can_input.value = true;
         return data.check;
       } catch (e) {
         console.log(e);
-        can_input.value = true;
         return [];
       }
     };
@@ -245,6 +242,7 @@ export default defineComponent({
 
     const sleep = (second: number) =>
       new Promise((resolve) => setTimeout(resolve, second * 1000));
+
     // 入力に応じて`lines`を更新して、"enter"が押されたらジャッジをする。
     const update = async (char: string) => {
       if (char === "delete") {
@@ -277,6 +275,8 @@ export default defineComponent({
         } catch (e) {
           return;
         }
+
+        can_input.value = false;
 
         // ジャッジする
         const data = await judge(left, right);
@@ -360,10 +360,11 @@ export default defineComponent({
           showModal.value = true;
           row_idx.value = 100;
           can_input.value = false;
+        } else {
+          row_idx.value++;
+          col_idx.value = 0;
+          can_input.value = true;
         }
-
-        row_idx.value++;
-        col_idx.value = 0;
       } else if (col_idx.value > LEFT_LEN.value + RIGHT_LEN.value - 1) {
         // すでに入力しきっているのにさらに入力が来た場合。 なのでスキップ
         return;

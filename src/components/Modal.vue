@@ -157,9 +157,9 @@ export default defineComponent({
               </div>
             </div>
             <div class="second-container">
-              <div class="timer">
+              <div class="outer_timer">
                 <div>次の問題まで</div>
-                <div class="timer">{{ hours }}:{{ minutes }}:{{ seconds }}</div>
+                <div class="inner_timer">{{ hours }}:{{ minutes }}:{{ seconds }}</div>
               </div>
               <img
                 src="../assets/copylogo.svg"
@@ -206,10 +206,12 @@ export default defineComponent({
   margin: 0 20px;
 }
 
-.timer {
+.outer_timer {
   font-size: 1.5rem;
   font-weight: bold;
   margin: auto;
+  padding-right: 1ex;
+  border-right: solid;
 }
 
 .answer-container {

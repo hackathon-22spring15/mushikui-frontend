@@ -243,6 +243,8 @@ export default defineComponent({
       }
     };
 
+    const sleep = (second: number) =>
+      new Promise((resolve) => setTimeout(resolve, second * 1000));
     // 入力に応じて`lines`を更新して、"enter"が押されたらジャッジをする。
     const update = async (char: string) => {
       if (char === "delete") {
@@ -277,7 +279,11 @@ export default defineComponent({
         }
 
         // ジャッジする
-        results.value[row_idx.value] = await judge(left, right);
+        const data = await judge(left, right);
+        for (const [i, v] of data.entries()) {
+          results.value[row_idx.value][i] = v;
+          await sleep(0.2);
+        }
 
         // ジャッジ結果をresult_by_valueに代入していく。
         for (let i = 0; i < LEFT_LEN.value; i++) {
@@ -687,19 +693,52 @@ export default defineComponent({
 }
 
 .correct {
-  background-color: rgb(99, 172, 99) !important;
+  animation: 0.4s linear rotation, 0.2s step-end correct-color forwards;
 }
 
 .half {
-  background-color: rgb(211, 211, 101) !important;
+  animation: 0.4s linear rotation, 0.2s step-end half-color forwards;
 }
 
 .notCorrect {
-  background-color: rgb(110, 108, 108) !important;
+  animation: 0.4s linear rotation, 0.2s step-end notCorrect-color forwards;
 }
 
 .current_input {
-  border: 5px solid rgb(40, 40, 40);
+  border: 5px solid #282828;
+}
+
+@keyframes rotation {
+  0% {
+    transform: rotateX(0);
+  }
+  49% {
+    transform: rotateX(90deg);
+  }
+  50% {
+    transform: rotateX(270deg);
+  }
+  100% {
+    transform: rotateX(360deg);
+  }
+}
+
+@keyframes correct-color {
+  to {
+    background-color: rgb(99, 172, 99);
+  }
+}
+
+@keyframes notCorrect-color {
+  to {
+    background-color: rgb(110, 108, 108);
+  }
+}
+
+@keyframes half-color {
+  to {
+    background-color: rgb(211, 211, 101);
+  }
 }
 </style>
 

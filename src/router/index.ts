@@ -10,9 +10,17 @@ const routes: RouteRecordRaw[] = [
     component: Home
   },
   {
-    path: '/random',
+    path: '/random/:seeds',
     name: 'Random',
-    component: Random
+    component: Random,
+    props: true
+  },
+  {
+    path: '/random',
+    redirect: '/random/' +  Math.floor(Math.random() * 100000),
+    name: 'Redirect',
+    component: Random,
+    props: true
   },
 ]
 

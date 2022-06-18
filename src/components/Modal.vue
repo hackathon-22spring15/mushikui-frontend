@@ -6,6 +6,7 @@ const zeroPadding = (num: number, digit: number) => {
   return (Array(digit).join("0") + num).slice(-digit);
 };
 
+
 export default defineComponent({
   name: "modal",
   props: {
@@ -52,6 +53,7 @@ export default defineComponent({
     const getAnswer = async () => {
       try {
         if (rand) {
+          ShareTextURL = "https://mushikui.trasta.dev/random/" + seed;
           const { data } =
             await apis.getEqualRandomExpressionRandomSeedAnswerGet(seed);
           answer.value = data.expression.replace("/", "÷").replace("*", "×");
@@ -73,7 +75,7 @@ export default defineComponent({
     });
     const TwitterBaseUrl = "https://twitter.com/intent/tweet?";
     const ShareTextBody = ref("");
-    const ShareTextURL = "https://mushikui.trasta.dev";
+    let ShareTextURL = "https://mushikui.trasta.dev";
     const twittersharebutton = () => {
       window.open(
         TwitterBaseUrl.concat(

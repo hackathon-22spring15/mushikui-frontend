@@ -1,6 +1,7 @@
 <script lang="ts">
 import { computed, defineComponent, onMounted, ref } from "vue";
 import apis, { Expression } from "../lib/apis";
+import { useCookies } from "vue3-cookies";
 
 const zeroPadding = (num: number, digit: number) => {
   return (Array(digit).join("0") + num).slice(-digit);
@@ -35,6 +36,9 @@ export default defineComponent({
   setup({ seed, rand }) {
     const date = ref(new Date());
     const answer = ref("");
+    const { cookies } = useCookies();
+    const win = ref("")
+    const lose = ref("")
 
     const hours = computed(() => {
       return zeroPadding(23 - date.value.getHours(), 2);
@@ -53,11 +57,19 @@ export default defineComponent({
     const getAnswer = async () => {
       try {
         if (rand) {
+          win.value = "-"
+          lose.value = "-"
           ShareTextURL = "https://mushikui.trasta.dev/random/" + seed;
           const { data } =
             await apis.getEqualRandomExpressionRandomSeedAnswerGet(seed);
           answer.value = data.expression.replace("/", "÷").replace("*", "×");
         } else {
+          const cookie_win = cookies.get("Win");
+          if (cookie_win === null) {win.value = "0";}
+          else {win.value = cookie_win}
+          const cookie_lose = cookies.get("Lose");
+          if (cookie_lose === null) {lose.value = "0";}
+          else {lose.value = cookie_lose}
           const { data } = await apis.getEqualDailyExpressionDateAnswerGet(
             seed
           );
@@ -127,6 +139,8 @@ export default defineComponent({
       answer,
       makesharebody,
       copysharebutton,
+      win,
+      lose,
     };
   },
 });
@@ -165,6 +179,9 @@ export default defineComponent({
                   twittersharebutton();
                 "
               >
+            </div>
+            <div class="win-lose">
+                  WIN: {{ win }} LOSE: {{ lose }}
             </div>
           </div>
         </div>

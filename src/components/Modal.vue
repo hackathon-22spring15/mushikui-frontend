@@ -96,8 +96,15 @@ export default defineComponent({
         toast.error("cannot copy");
       }
     };
-    const makesharebody = (equl: Number, resl: Number[][], ent: string) => {
-      ShareTextBody.value = "Mushikui" + ent;
+    const makesharebody = (equl: Number, resl: Number[][], ent: string, rand: boolean, seed: number) => {
+      ShareTextBody.value = "Mushikui";
+      const seedTxt = seed.toString();
+      if (rand) {
+        ShareTextBody.value += " " + seedTxt;
+      } else {
+        ShareTextBody.value += " " + seedTxt.slice(0, 4) + "-" + seedTxt.slice(4, 6) + "-" + seedTxt.slice(6, 8);
+      }
+      ShareTextBody.value += ent;
       let flg = false;
       console.log(resl);
       resl.forEach((resl2) => {
@@ -157,7 +164,7 @@ export default defineComponent({
                 src="../assets/copylogo.svg"
                 class="modal-share-button"
                 @click="
-                  makesharebody(equl, resl, '\n');
+                  makesharebody(equl, resl, '\n', rand, seed);
                   copysharebutton();
                 "
               />
@@ -165,7 +172,7 @@ export default defineComponent({
                 src="../assets/twitterlogo.svg"
                 class="modal-tweet-button"
                 @click="
-                  makesharebody(equl, resl, '%0a');
+                  makesharebody(equl, resl, '%0a', rand, seed);
                   twittersharebutton();
                 "
               />

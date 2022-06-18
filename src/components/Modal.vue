@@ -17,11 +17,20 @@ export default defineComponent({
       type: Number,
       default: 0,
     },
+    resl: {
+      type: Array<Array<string>>,
+      default: [[]],
+    },
+    equl: {
+      type: Number,
+      default: 0,
+    },
     rand: {
       type: Boolean,
       default: false,
     },
   },
+
   setup({ seed, rand }) {
     const date = ref(new Date());
     const answer = ref("");
@@ -63,21 +72,50 @@ export default defineComponent({
       setInterval(setDate, 1000);
       getAnswer();
     });
-
     const TwitterBaseUrl = "https://twitter.com/intent/tweet?";
-    const ShareTextBody = ref("いい感じのコメント");
-    const ShareTextURL = "https://trap.jp";
+    const ShareTextBody = ref("");
+    const ShareTextURL = "https://mushikui.trasta.dev";
     const twittersharebutton = () => {
       window.open(
         TwitterBaseUrl.concat(
           "text=",
           ShareTextBody.value,
-          "%0a",
           "&url=",
           ShareTextURL
         ),
         "twitter"
       );
+    };
+    const copysharebutton  = async () =>{
+      try {
+        await navigator.clipboard.writeText(ShareTextBody.value+ShareTextURL);
+        alert("Copied!");
+      } catch (e){
+        alert("fail to copy")
+      }
+    }
+    const makesharebody = (equl:Number ,resl: string[][], ent: string) => {
+      ShareTextBody.value="Mushikui"+ent;
+      let flg=false;
+      console.log(resl);
+      resl.forEach((resl2)=>{
+        flg=true;
+        resl2.forEach((resl3,ind)=>{
+          if(resl3==="x"){
+            if(ind===equl) ShareTextBody.value+="=";
+            ShareTextBody.value+="⬜";
+          }else if(resl3==="h"){
+            if(ind===equl) ShareTextBody.value+="=";
+            ShareTextBody.value+="🟨";
+          }else if(resl3==="o"){
+            if(ind===equl) ShareTextBody.value+="=";
+            ShareTextBody.value+="🟩";
+          }else{
+            flg=false;
+          }
+        })
+        if(flg) ShareTextBody.value+=ent;
+      })
     };
 
     return {
@@ -86,6 +124,8 @@ export default defineComponent({
       seconds,
       twittersharebutton,
       answer,
+      makesharebody,
+      copysharebutton,
     };
   },
 });
@@ -108,7 +148,8 @@ export default defineComponent({
                 <div>次の問題まで</div>
                 <div class="timer">{{ hours }}:{{ minutes }}:{{ seconds }}</div>
               </div>
-              <button class="modal-share-button" @click="twittersharebutton">
+              <button class="buton" @click="makesharebody(equl,resl,'\n');copysharebutton()">log</button>
+              <button class="modal-share-button" @click="makesharebody(equl,resl,'%0a');twittersharebutton();">
                 share
               </button>
             </div>

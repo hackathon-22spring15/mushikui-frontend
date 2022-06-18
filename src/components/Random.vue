@@ -631,6 +631,6 @@ export default defineComponent({
 }
 
 .current_input {
-  background-color: rgb(84, 84, 84) !important;
+  background-color: rgb(160, 160, 160) !important;
 }
 </style>

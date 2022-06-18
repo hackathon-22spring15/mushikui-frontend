@@ -603,6 +603,7 @@ export default defineComponent({
   text-transform: uppercase;
   user-select: none;
   background-color: rgb(223, 223, 223);
+  border-radius: 5px;
 }
 
 .equal {
@@ -672,6 +673,7 @@ export default defineComponent({
 }
 
 .current_input {
-  background-color: rgb(84, 84, 84) !important;
+  border: 5px solid rgb(40, 40, 40);
+  /* background-color: rgb(160, 160, 160) !important; */
 }
 </style>

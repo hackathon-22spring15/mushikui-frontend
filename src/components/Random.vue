@@ -4,6 +4,7 @@ import Key from "./Key.vue";
 import ResultModal from "./Modal.vue";
 import apis, { Expression } from "../lib/apis";
 import { transSymbol } from "../utils";
+import { useToast } from "vue-toastification";
 
 const check_finished = (row: Array<string>) => {
   return row.every((e) => e === "o");
@@ -29,6 +30,7 @@ export default defineComponent({
     const showModal = ref(false);
     const can_input = ref(true);
     const seed = ref(0);
+    const toast = useToast();
 
     onBeforeMount(async () => {
       seed.value = Math.floor(Math.random() * 100000);
@@ -239,14 +241,14 @@ export default defineComponent({
       } else if (char === "return") {
         // 入力しきっていない場合はalertを出す
         if (col_idx.value !== LEFT_LEN.value + RIGHT_LEN.value) {
-          alert("please input all");
+          toast.error("please input all");
           return;
         }
 
         const left = lines.value[row_idx.value].left.join("");
         const right = lines.value[row_idx.value].right.join("");
         if (eval(left) !== eval(right)) {
-          window.alert("入力された式は正しくありません");
+          toast.error("Enter the correct equation");
           return;
         }
 
@@ -632,5 +634,11 @@ export default defineComponent({
 
 .current_input {
   background-color: rgb(160, 160, 160) !important;
+}
+</style>
+
+<style>
+.Vue-Toastification__toast-body {
+  text-align: center !important;
 }
 </style>

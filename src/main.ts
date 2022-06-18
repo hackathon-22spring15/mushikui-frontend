@@ -16,7 +16,6 @@ const options: PluginOptions = {
   newestOnTop: true,
   toastDefaults: {
     [TYPE.ERROR]: {
-        timeout: 50000,
         position: POSITION.TOP_CENTER,
         closeOnClick: false,
         pauseOnFocusLoss: true,

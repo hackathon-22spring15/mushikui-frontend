@@ -515,6 +515,7 @@ export default defineComponent({
     <ResultModal
       :show="showModal"
       :seed="seed"
+      :resl="results"
       @close="showModal = false"
     ></ResultModal>
   </Teleport>

@@ -17,12 +17,17 @@ export default defineComponent({
       type: Number,
       default: 0,
     },
+    resl: {
+      type: Array<Array<string>>,
+      default: [[]],
+    },
     rand: {
       type: Boolean,
       default: false,
     },
   },
-  setup({ seed, rand }) {
+
+  setup({ seed, rand, resl }) {
     const date = ref(new Date());
     const answer = ref("");
 
@@ -79,6 +84,15 @@ export default defineComponent({
         "twitter"
       );
     };
+    const logg=()=>{
+      console.log(resl);
+      resl.forEach((resl2)=>{
+        resl2.forEach((resl3)=>{
+          console.log(resl3);
+        })
+        console.log("---")
+      })
+    };
 
     return {
       hours,
@@ -86,6 +100,7 @@ export default defineComponent({
       seconds,
       twittersharebutton,
       answer,
+      logg,
     };
   },
 });
@@ -108,6 +123,7 @@ export default defineComponent({
                 <div>次の問題まで</div>
                 <div class="timer">{{ hours }}:{{ minutes }}:{{ seconds }}</div>
               </div>
+              <button class="buton" @click="logg">log</button>
               <button class="modal-share-button" @click="twittersharebutton">
                 share
               </button>

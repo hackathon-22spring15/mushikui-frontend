@@ -146,7 +146,10 @@ export default defineComponent({
           <div class="modal-body">
             <div class="answer-container">{{ answer }}</div>
             <div class="second-container">
-              <div class="timer">
+              <div v-if="rand" class="timer">
+                <a class="tonext" href="/random">次の問題</a>
+              </div>
+              <div v-else class="timer">
                 <div>次の問題まで</div>
                 <div class="timer">{{ hours }}:{{ minutes }}:{{ seconds }}</div>
               </div>
@@ -185,6 +188,11 @@ export default defineComponent({
   font-size: 1.5rem;
   font-weight: bold;
   margin: auto;
+}
+
+.tonext {
+  text-decoration: none;
+  color: #42b983;
 }
 
 .answer-container {

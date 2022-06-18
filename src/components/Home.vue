@@ -313,13 +313,13 @@ export default defineComponent({
         // 終了判定
         const is_finished = check_finished(results.value[row_idx.value]);
         if (is_finished){
-          let win =  parseInt(cookies.get("Win"));
+          const win =  parseInt(cookies.get("Win"));
           cookies.set("Win", String(win + 1));
           showModal.value = true;
           row_idx.value = 100;
           can_input.value = false;
         }else if (row_idx.value === N_ROW - 1) {
-          let lose = parseInt(cookies.get("Lose"));
+          const lose = parseInt(cookies.get("Lose"));
           cookies.set("Lose", String(lose + 1));
           showModal.value = true;
           row_idx.value = 100;
@@ -341,7 +341,7 @@ export default defineComponent({
         }
         col_idx.value++;
       }
-      var state = {"date": seed.value, "row_idx": row_idx.value, "col_idx": col_idx.value, "results": results.value, "lines": lines.value, "result_by_value": result_by_value.value};
+      const state = {"date": seed.value, "row_idx": row_idx.value, "col_idx": col_idx.value, "results": results.value, "lines": lines.value, "result_by_value": result_by_value.value};
       cookies.set("user_state", JSON.stringify(state));
     };
 

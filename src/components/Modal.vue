@@ -1,6 +1,7 @@
 <script lang="ts">
 import { computed, defineComponent, onMounted, ref } from "vue";
 import apis, { Expression } from "../lib/apis";
+import { useToast } from "vue-toastification";
 
 const zeroPadding = (num: number, digit: number) => {
   return (Array(digit).join("0") + num).slice(-digit);
@@ -34,6 +35,7 @@ export default defineComponent({
   setup({ seed, rand }) {
     const date = ref(new Date());
     const answer = ref("");
+    const toast = useToast();
 
     const hours = computed(() => {
       return zeroPadding(23 - date.value.getHours(), 2);
@@ -88,9 +90,9 @@ export default defineComponent({
     const copysharebutton  = async () =>{
       try {
         await navigator.clipboard.writeText(ShareTextBody.value+ShareTextURL);
-        alert("Copied!");
+        toast.success("copied!");
       } catch (e){
-        alert("fail to copy")
+        toast.error("cannot copy");
       }
     }
     const makesharebody = (equl:Number ,resl: number[][], ent: string) => {

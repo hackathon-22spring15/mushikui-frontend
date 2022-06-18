@@ -244,11 +244,15 @@ export default defineComponent({
           return;
         }
 
+        const left = lines.value[row_idx.value].left.join("");
+        const right = lines.value[row_idx.value].right.join("");
+        if (eval(left) !== eval(right)) {
+          window.alert("入力された式は正しくありません");
+          return;
+        }
+
         // ジャッジする
-        results.value[row_idx.value] = await judge(
-          lines.value[row_idx.value].left.join(""),
-          lines.value[row_idx.value].right.join("")
-        );
+        results.value[row_idx.value] = await judge(left, right);
 
         // ジャッジ結果をresult_by_valueに代入していく。
         for (let i = 0; i < LEFT_LEN.value; i++) {

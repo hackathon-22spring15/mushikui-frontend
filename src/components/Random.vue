@@ -34,7 +34,9 @@ export default defineComponent({
       seed.value = Math.floor(Math.random() * 100000);
       try {
         can_input.value = false;
-        const { data } = await apis.getEqualRandomExpressionRandomSeedGet(seed.value);
+        const { data } = await apis.getEqualRandomExpressionRandomSeedGet(
+          seed.value
+        );
         RIGHT_LEN.value = 6 - data.pos;
         LEFT_LEN.value = data.pos;
         lines.value = init_line(LEFT_LEN.value, RIGHT_LEN.value, N_ROW);
@@ -240,11 +242,15 @@ export default defineComponent({
           return;
         }
 
+        const left = lines.value[row_idx.value].left.join("");
+        const right = lines.value[row_idx.value].right.join("");
+        if (eval(left) !== eval(right)) {
+          window.alert("入力された式は正しくありません");
+          return;
+        }
+
         // ジャッジする
-        results.value[row_idx.value] = await judge(
-          lines.value[row_idx.value].left.join(""),
-          lines.value[row_idx.value].right.join("")
-        );
+        results.value[row_idx.value] = await judge(left, right);
 
         // ジャッジ結果をresult_by_valueに代入していく。
         for (let i = 0; i < LEFT_LEN.value; i++) {

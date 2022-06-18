@@ -43,9 +43,8 @@ export default defineComponent({
     const getAnswer = async () => {
       try {
         if (rand) {
-          const { data } = await apis.getEqualRandomExpressionRandomSeedAnswerGet(
-            seed
-          );
+          const { data } =
+            await apis.getEqualRandomExpressionRandomSeedAnswerGet(seed);
           answer.value = data.expression.replace("/", "÷").replace("*", "×");
         } else {
           const { data } = await apis.getEqualDailyExpressionDateAnswerGet(

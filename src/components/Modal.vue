@@ -1,12 +1,12 @@
 <script lang="ts">
-import { computed, defineComponent, onMounted, ref } from "vue";
+import { computed, defineComponent, onMounted, PropType, ref } from "vue";
 import apis, { Expression } from "../lib/apis";
 import { useCookies } from "vue3-cookies";
+import { useToast } from "vue-toastification";
 
 const zeroPadding = (num: number, digit: number) => {
   return (Array(digit).join("0") + num).slice(-digit);
 };
-
 
 export default defineComponent({
   name: "modal",
@@ -20,7 +20,7 @@ export default defineComponent({
       default: 0,
     },
     resl: {
-      type: Array<Array<number>>,
+      type: Array as PropType<Array<Array<Number>>>,
       default: [[]],
     },
     equl: {
@@ -39,6 +39,8 @@ export default defineComponent({
     const { cookies } = useCookies();
     const win = ref("")
     const lose = ref("")
+    const toast = useToast();
+
 
     const hours = computed(() => {
       return zeroPadding(23 - date.value.getHours(), 2);
@@ -99,36 +101,36 @@ export default defineComponent({
         "twitter"
       );
     };
-    const copysharebutton  = async () =>{
+    const copysharebutton = async () => {
       try {
-        await navigator.clipboard.writeText(ShareTextBody.value+ShareTextURL);
-        alert("Copied!");
-      } catch (e){
-        alert("fail to copy")
+        await navigator.clipboard.writeText(ShareTextBody.value + ShareTextURL);
+        toast.success("copied!");
+      } catch (e) {
+        toast.error("cannot copy");
       }
-    }
-    const makesharebody = (equl:Number ,resl: number[][], ent: string) => {
-      ShareTextBody.value="Mushikui"+ent;
-      let flg=false;
+    };
+    const makesharebody = (equl: Number, resl: Number[][], ent: string) => {
+      ShareTextBody.value = "Mushikui" + ent;
+      let flg = false;
       console.log(resl);
-      resl.forEach((resl2)=>{
-        flg=true;
-        resl2.forEach((resl3,ind)=>{
-          if(resl3===2){
-            if(ind===equl) ShareTextBody.value+="=";
-            ShareTextBody.value+="🟩";
-          }else if(resl3===1){
-            if(ind===equl) ShareTextBody.value+="=";
-            ShareTextBody.value+="🟨";
-          }else if(resl3===0){
-            if(ind===equl) ShareTextBody.value+="=";
-            ShareTextBody.value+="⬜";
-          }else{
-            flg=false;
+      resl.forEach((resl2) => {
+        flg = true;
+        resl2.forEach((resl3, ind) => {
+          if (resl3 === 2) {
+            if (ind === equl) ShareTextBody.value += "=";
+            ShareTextBody.value += "🟩";
+          } else if (resl3 === 1) {
+            if (ind === equl) ShareTextBody.value += "=";
+            ShareTextBody.value += "🟨";
+          } else if (resl3 === 0) {
+            if (ind === equl) ShareTextBody.value += "=";
+            ShareTextBody.value += "⬜";
+          } else {
+            flg = false;
           }
-        })
-        if(flg) ShareTextBody.value+=ent;
-      })
+        });
+        if (flg) ShareTextBody.value += ent;
+      });
     };
 
     return {
@@ -170,7 +172,7 @@ export default defineComponent({
                   makesharebody(equl, resl, '\n');
                   copysharebutton();
                 "
-              >
+              />
               <img
                 src="../assets/twitterlogo.svg"
                 class="modal-tweet-button"
@@ -178,7 +180,7 @@ export default defineComponent({
                   makesharebody(equl, resl, '%0a');
                   twittersharebutton();
                 "
-              >
+              />
             </div>
             <div class="win-lose">
                   WIN: {{ win }} LOSE: {{ lose }}

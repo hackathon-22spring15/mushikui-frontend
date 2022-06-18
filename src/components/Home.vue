@@ -79,11 +79,11 @@ export default defineComponent({
       if (!can_input.value) return;
       switch (e.key) {
         case "Enter":
-          update("return");
+          update("⏎");
           break;
         case "Backspace":
         case "Delete":
-          update("delete");
+          update("⌫");
           break;
         default:
           if (/^[0-9-/\+\*]$/.test(e.key)) {
@@ -247,7 +247,7 @@ export default defineComponent({
       new Promise((resolve) => setTimeout(resolve, second * 1000));
     // 入力に応じて`lines`を更新して、"enter"が押されたらジャッジをする。
     const update = async (char: string) => {
-      if (char === "delete") {
+      if (char === "⌫") {
         // col_idx.value === 0 な時、まだ何も入力されていないのでスキップ
         if (col_idx.value === 0) {
           return;
@@ -260,7 +260,7 @@ export default defineComponent({
           lines.value[row_idx.value].left[col_idx.value - 1] = "";
         }
         col_idx.value--;
-      } else if (char === "return") {
+      } else if (char === "⏎") {
         // 入力しきっていない場合はalertを出す
         if (col_idx.value !== LEFT_LEN.value + RIGHT_LEN.value) {
           toast.error("please input all");
@@ -583,8 +583,8 @@ export default defineComponent({
       ></Key>
     </div>
     <div class="special">
-      <Key char="delete" :input="update"></Key>
-      <Key char="return" :input="update"></Key>
+      <Key char="⌫" :input="update"></Key>
+      <Key char="⏎" :input="update"></Key>
     </div>
   </div>
   <Teleport to="body">
@@ -740,9 +740,7 @@ export default defineComponent({
     background-color: rgb(211, 211, 101);
   }
 }
-</style>
 
-<style>
 .Vue-Toastification__toast-body {
   text-align: center !important;
 }

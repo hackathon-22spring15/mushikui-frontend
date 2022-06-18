@@ -2,6 +2,7 @@
 import { computed, defineComponent, onMounted, PropType, ref } from "vue";
 import apis, { Expression } from "../lib/apis";
 import { useToast } from "vue-toastification";
+import { useCookies } from "vue3-cookies";
 
 const zeroPadding = (num: number, digit: number) => {
   return (Array(digit).join("0") + num).slice(-digit);
@@ -36,6 +37,7 @@ export default defineComponent({
     const date = ref(new Date());
     const answer = ref("");
     const toast = useToast();
+    const { cookies } = useCookies();
 
     const hours = computed(() => {
       return zeroPadding(23 - date.value.getHours(), 2);
@@ -128,6 +130,7 @@ export default defineComponent({
       answer,
       makesharebody,
       copysharebutton,
+      cookies,
     };
   },
 });
@@ -145,6 +148,14 @@ export default defineComponent({
           </div>
           <div class="modal-body">
             <div class="answer-container">{{ answer }}</div>
+            <div v-if="!rand" class="score-margin">
+              <div class="score">
+                win:{{(cookies.get("Win")||0)}}
+              </div>
+              <div class="score">
+                lose:{{((cookies.get("Lose"))||0)}}
+              </div>
+            </div>
             <div class="second-container">
               <div class="timer">
                 <div>次の問題まで</div>
@@ -160,7 +171,7 @@ export default defineComponent({
               />
               <img
                 src="../assets/twitterlogo.svg"
-                class="modal-tweet-button"
+                class="modal-share-button"
                 @click="
                   makesharebody(equl, resl, '%0a');
                   twittersharebutton();
@@ -179,6 +190,20 @@ export default defineComponent({
   display: flex;
   justify-content: center;
   align-items: center;
+  margin-top: 10px;
+}
+
+.score-margin {
+  font-size: 1.7rem;
+  display: flex;
+  justify-content: center;
+  margin: auto;
+  padding: auto 40px;
+  margin-bottom: 10px;
+}
+
+.score {
+  margin: 0 20px;
 }
 
 .timer {
@@ -240,13 +265,15 @@ export default defineComponent({
 }
 
 .modal-share-button {
-  width: 40px;
+  width: 50px;
+  height: 55px;
   float: center;
   margin: auto;
 }
 
 .modal-tweet-button {
-  width: 40px;
+  width: 50px;
+  height: 50px;
   float: center;
   margin: auto;
 }

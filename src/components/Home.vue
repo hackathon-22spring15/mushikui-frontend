@@ -4,10 +4,19 @@ import Key from "./Key.vue";
 import ResultModal from "./Modal.vue";
 import apis, { Expression } from "../lib/apis";
 import { transSymbol } from "../utils";
+import { globalCookiesConfig, useCookies } from "vue3-cookies";
 
 const check_finished = (row: Array<string>) => {
   return row.every((e) => e === "o");
 };
+
+globalCookiesConfig({
+  expireTimes: "3y",
+  path: "/",
+  domain: "",
+  secure: true,
+  sameSite: "None",
+});
 
 export default defineComponent({
   setup() {
@@ -29,6 +38,7 @@ export default defineComponent({
     const showModal = ref(false);
     const can_input = ref(true);
     const seed = ref(0);
+    const { cookies } = useCookies();
 
     onBeforeMount(async () => {
       const today = new Date();
@@ -47,6 +57,18 @@ export default defineComponent({
         console.log(e);
       }
       can_input.value = true;
+      var state = JSON.parse(JSON.stringify(cookies.get("user_state")));
+      if (state.date === seed.value){
+        row_idx.value = state.row_idx;
+        col_idx.value = state.col_idx;
+        results.value = state.results;
+        lines.value = state.lines;
+        result_by_value.value = state.result_by_value;
+      }
+      if (row_idx.value > N_ROW){
+            showModal.value = true;
+            can_input.value = false;
+      }
     });
 
     const logKey = (e: KeyboardEvent) => {
@@ -290,7 +312,15 @@ export default defineComponent({
 
         // 終了判定
         const is_finished = check_finished(results.value[row_idx.value]);
-        if (is_finished || row_idx.value === N_ROW - 1) {
+        if (is_finished){
+          const win =  parseInt(cookies.get("Win"));
+          cookies.set("Win", String(win + 1));
+          showModal.value = true;
+          row_idx.value = 100;
+          can_input.value = false;
+        }else if (row_idx.value === N_ROW - 1) {
+          const lose = parseInt(cookies.get("Lose"));
+          cookies.set("Lose", String(lose + 1));
           showModal.value = true;
           row_idx.value = 100;
           can_input.value = false;
@@ -311,6 +341,8 @@ export default defineComponent({
         }
         col_idx.value++;
       }
+      const state = {"date": seed.value, "row_idx": row_idx.value, "col_idx": col_idx.value, "results": results.value, "lines": lines.value, "result_by_value": result_by_value.value};
+      cookies.set("user_state", JSON.stringify(state));
     };
 
     return {
@@ -333,6 +365,7 @@ export default defineComponent({
       showModal,
       transSymbol,
       seed,
+      cookies,
     };
   },
   components: {

@@ -265,8 +265,12 @@ export default defineComponent({
 
         const left = lines.value[row_idx.value].left.join("");
         const right = lines.value[row_idx.value].right.join("");
-        if (eval(left) !== eval(right)) {
-          toast.error("Enter the correct equation");
+        try {
+          if (eval(left) !== eval(right)) {
+            toast.error("Enter the correct equation");
+            return;
+          }
+        } catch (e) {
           return;
         }
 
@@ -277,36 +281,60 @@ export default defineComponent({
         for (let i = 0; i < LEFT_LEN.value; i++) {
           const v = lines.value[row_idx.value].left[i];
           if (v === "+") {
-            result_by_value.value[10] = Math.max(result_by_value.value[10], results.value[row_idx.value][i]);
+            result_by_value.value[10] = Math.max(
+              result_by_value.value[10],
+              results.value[row_idx.value][i]
+            );
           } else if (v === "-") {
-            result_by_value.value[11] = Math.max(result_by_value.value[11], results.value[row_idx.value][i]);
+            result_by_value.value[11] = Math.max(
+              result_by_value.value[11],
+              results.value[row_idx.value][i]
+            );
           } else if (v === "*") {
-            result_by_value.value[12] = Math.max(result_by_value.value[12], results.value[row_idx.value][i]);
+            result_by_value.value[12] = Math.max(
+              result_by_value.value[12],
+              results.value[row_idx.value][i]
+            );
           } else if (v === "/") {
-            result_by_value.value[13] = Math.max(result_by_value.value[13], results.value[row_idx.value][i]);
+            result_by_value.value[13] = Math.max(
+              result_by_value.value[13],
+              results.value[row_idx.value][i]
+            );
           } else {
-            result_by_value.value[parseInt(v)] =
-              Math.max(result_by_value.value[parseInt(v)], results.value[row_idx.value][i]);
+            result_by_value.value[parseInt(v)] = Math.max(
+              result_by_value.value[parseInt(v)],
+              results.value[row_idx.value][i]
+            );
           }
         }
 
         for (let i = 0; i < RIGHT_LEN.value; i++) {
           const v = lines.value[row_idx.value].right[i];
           if (v === "+") {
-            result_by_value.value[10] =
-              Math.max(result_by_value.value[10], results.value[row_idx.value][i + LEFT_LEN.value]);
+            result_by_value.value[10] = Math.max(
+              result_by_value.value[10],
+              results.value[row_idx.value][i + LEFT_LEN.value]
+            );
           } else if (v === "-") {
-            result_by_value.value[11] =
-              Math.max(result_by_value.value[11], results.value[row_idx.value][i + LEFT_LEN.value]);
+            result_by_value.value[11] = Math.max(
+              result_by_value.value[11],
+              results.value[row_idx.value][i + LEFT_LEN.value]
+            );
           } else if (v === "*") {
-            result_by_value.value[12] =
-              Math.max(result_by_value.value[12], results.value[row_idx.value][i + LEFT_LEN.value]);
+            result_by_value.value[12] = Math.max(
+              result_by_value.value[12],
+              results.value[row_idx.value][i + LEFT_LEN.value]
+            );
           } else if (v === "/") {
-            result_by_value.value[13] =
-              Math.max(result_by_value.value[13], results.value[row_idx.value][i + LEFT_LEN.value]);
+            result_by_value.value[13] = Math.max(
+              result_by_value.value[13],
+              results.value[row_idx.value][i + LEFT_LEN.value]
+            );
           } else {
-            result_by_value.value[parseInt(v)] =
-              Math.max(result_by_value.value[parseInt(v)], results.value[row_idx.value][i + LEFT_LEN.value]);
+            result_by_value.value[parseInt(v)] = Math.max(
+              result_by_value.value[parseInt(v)],
+              results.value[row_idx.value][i + LEFT_LEN.value]
+            );
           }
         }
 
@@ -671,7 +699,6 @@ export default defineComponent({
 .current_input {
   border: 5px solid rgb(40, 40, 40);
 }
-
 </style>
 
 <style>

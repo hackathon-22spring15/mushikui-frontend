@@ -244,8 +244,12 @@ export default defineComponent({
 
         const left = lines.value[row_idx.value].left.join("");
         const right = lines.value[row_idx.value].right.join("");
-        if (eval(left) !== eval(right)) {
-          toast.error("Enter the correct equation");
+        try {
+          if (eval(left) !== eval(right)) {
+            toast.error("Enter the correct equation");
+            return;
+          }
+        } catch (e) {
           return;
         }
 

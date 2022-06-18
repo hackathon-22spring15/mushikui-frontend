@@ -137,7 +137,7 @@ export default defineComponent({
         <div class="modal-container">
           <div class="modal-header">
             <button class="modal-close-button" @click="$emit('close')">
-              x
+              ×
             </button>
           </div>
           <div class="modal-body">
@@ -147,24 +147,22 @@ export default defineComponent({
                 <div>次の問題まで</div>
                 <div class="timer">{{ hours }}:{{ minutes }}:{{ seconds }}</div>
               </div>
-              <button
-                class="buton"
+              <img
+                src="../assets/copylogo.svg"
+                class="modal-share-button"
                 @click="
                   makesharebody(equl, resl, '\n');
                   copysharebutton();
                 "
               >
-                log
-              </button>
-              <button
-                class="modal-share-button"
+              <img
+                src="../assets/twitterlogo.svg"
+                class="modal-tweet-button"
                 @click="
                   makesharebody(equl, resl, '%0a');
                   twittersharebutton();
                 "
               >
-                share
-              </button>
             </div>
           </div>
         </div>
@@ -211,9 +209,9 @@ export default defineComponent({
 }
 
 .modal-container {
-  width: 300px;
+  width: 350px;
   margin: 0px auto;
-  padding: 20px 30px;
+  padding: 10px 10px;
   background-color: #fff;
   border-radius: 2px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.33);
@@ -226,14 +224,26 @@ export default defineComponent({
 }
 
 .modal-body {
-  margin: 20px 0;
+  margin: 30px 30px;
 }
 
 .modal-close-button {
+  font-size: 1.5rem;
+  width: 30px;
+  height: 30px;
+  border: 1px;
+  background-color: #fff;
   float: right;
 }
 
 .modal-share-button {
+  width: 40px;
+  float: center;
+  margin: auto;
+}
+
+.modal-tweet-button {
+  width: 40px;
   float: center;
   margin: auto;
 }

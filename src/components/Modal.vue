@@ -281,18 +281,21 @@ export default defineComponent({
   border: 1px;
   background-color: #fff;
   float: right;
+  cursor: pointer;
 }
 
 .modal-share-button {
   width: 40px;
   float: center;
   margin: auto;
+  cursor: pointer;
 }
 
 .modal-tweet-button {
   width: 40px;
   float: center;
   margin: auto;
+  cursor: pointer;
 }
 
 /*

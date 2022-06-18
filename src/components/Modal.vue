@@ -102,13 +102,13 @@ export default defineComponent({
         resl2.forEach((resl3,ind)=>{
           if(resl3===2){
             if(ind===equl) ShareTextBody.value+="=";
-            ShareTextBody.value+="⬜";
+            ShareTextBody.value+="🟩";
           }else if(resl3===1){
             if(ind===equl) ShareTextBody.value+="=";
             ShareTextBody.value+="🟨";
           }else if(resl3===0){
             if(ind===equl) ShareTextBody.value+="=";
-            ShareTextBody.value+="🟩";
+            ShareTextBody.value+="⬜";
           }else{
             flg=false;
           }

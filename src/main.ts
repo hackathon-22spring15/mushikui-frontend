@@ -24,6 +24,15 @@ const options: PluginOptions = {
         closeButton: false,
         icon: false,
     },
+    [TYPE.SUCCESS]: {
+        position: POSITION.TOP_CENTER,
+        closeOnClick: false,
+        pauseOnFocusLoss: true,
+        draggable: false,
+        hideProgressBar: true,
+        closeButton: false,
+        icon: false,
+    },
   },
 };
 app.use(Toast, options);

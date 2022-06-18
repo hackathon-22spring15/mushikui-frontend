@@ -147,8 +147,22 @@ export default defineComponent({
                 <div>次の問題まで</div>
                 <div class="timer">{{ hours }}:{{ minutes }}:{{ seconds }}</div>
               </div>
-              <button class="buton" @click="makesharebody(equl,resl,'\n');copysharebutton()">log</button>
-              <button class="modal-share-button" @click="makesharebody(equl,resl,'%0a');twittersharebutton();">
+              <button
+                class="buton"
+                @click="
+                  makesharebody(equl, resl, '\n');
+                  copysharebutton();
+                "
+              >
+                log
+              </button>
+              <button
+                class="modal-share-button"
+                @click="
+                  makesharebody(equl, resl, '%0a');
+                  twittersharebutton();
+                "
+              >
                 share
               </button>
             </div>

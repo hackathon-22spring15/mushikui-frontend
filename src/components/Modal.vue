@@ -57,12 +57,12 @@ export default defineComponent({
           ShareTextURL = "https://mushikui.trasta.dev/random/" + seed;
           const { data } =
             await apis.getEqualRandomExpressionRandomSeedAnswerGet(seed);
-          answer.value = data.expression.replace("/", "÷").replace("*", "×");
+          answer.value = data.expression.replaceAll("/", "÷").replaceAll("*", "×");
         } else {
           const { data } = await apis.getEqualDailyExpressionDateAnswerGet(
             seed
           );
-          answer.value = data.expression.replace("/", "÷").replace("*", "×");
+          answer.value = data.expression.replaceAll("/", "÷").replaceAll("*", "×");
         }
       } catch (e) {
         console.log(e);

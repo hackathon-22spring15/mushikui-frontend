@@ -58,7 +58,9 @@ export default defineComponent({
       }
       can_input.value = true;
       var state = JSON.parse(JSON.stringify(cookies.get("user_state")));
-      if (state.date === seed.value){
+      if(state.date === null){
+        state.date = 0
+      } else if (state.date === seed.value){
         row_idx.value = state.row_idx;
         col_idx.value = state.col_idx;
         results.value = state.results;

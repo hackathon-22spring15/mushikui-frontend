@@ -2,7 +2,6 @@
 import { computed, defineComponent, onMounted, PropType, ref } from "vue";
 import apis, { Expression } from "../lib/apis";
 import { useToast } from "vue-toastification";
-import POSITION from 'vue-toastification';
 
 const zeroPadding = (num: number, digit: number) => {
   return (Array(digit).join("0") + num).slice(-digit);

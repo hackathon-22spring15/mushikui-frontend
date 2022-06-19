@@ -53,7 +53,6 @@ export default defineComponent({
     });
 
     const logKey = (e: KeyboardEvent) => {
-      if (!can_input.value) return;
       switch (e.key) {
         case "Enter":
           update("⏎");
@@ -222,6 +221,7 @@ export default defineComponent({
 
     // 入力に応じて`lines`を更新して、"enter"が押されたらジャッジをする。
     const update = async (char: string) => {
+      if (!can_input.value) return;
       if (char === "⌫") {
         // col_idx.value === 0 な時、まだ何も入力されていないのでスキップ
         if (col_idx.value === 0) {

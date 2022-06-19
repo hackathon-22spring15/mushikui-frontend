@@ -211,7 +211,7 @@ export default defineComponent({
   font-weight: bold;
   margin: auto;
   padding-right: 1ex;
-  border-right: solid;
+  /* border-right: solid; */
 }
 
 .answer-container {

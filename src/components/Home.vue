@@ -60,9 +60,9 @@ export default defineComponent({
       }
       can_input.value = true;
       var state = JSON.parse(JSON.stringify(cookies.get("user_state")));
-      if(state.date === null){
-        state.date = 0
-      } else if (state.date === seed.value){
+      if (state.date === null) {
+        state.date = 0;
+      } else if (state.date === seed.value) {
         row_idx.value = state.row_idx;
         col_idx.value = state.col_idx;
         results.value = state.results;
@@ -79,11 +79,11 @@ export default defineComponent({
       if (!can_input.value) return;
       switch (e.key) {
         case "Enter":
-          update("return");
+          update("⏎");
           break;
         case "Backspace":
         case "Delete":
-          update("delete");
+          update("⌫");
           break;
         default:
           if (/^[0-9-/\+\*]$/.test(e.key)) {
@@ -213,17 +213,14 @@ export default defineComponent({
 
     const check = async (expr: string) => {
       try {
-        can_input.value = false;
         var expre: Expression = { expression: expr };
         var { data } = await apis.postExpressionDailyExpressionDatePost(
           seed.value,
           expre
         );
-        can_input.value = true;
         return data.check;
       } catch (e) {
         console.log(e);
-        can_input.value = true;
         return [];
       }
     };
@@ -243,9 +240,12 @@ export default defineComponent({
       }
     };
 
+    const sleep = (second: number) =>
+      new Promise((resolve) => setTimeout(resolve, second * 1000));
+
     // 入力に応じて`lines`を更新して、"enter"が押されたらジャッジをする。
     const update = async (char: string) => {
-      if (char === "delete") {
+      if (char === "⌫") {
         // col_idx.value === 0 な時、まだ何も入力されていないのでスキップ
         if (col_idx.value === 0) {
           return;
@@ -258,7 +258,7 @@ export default defineComponent({
           lines.value[row_idx.value].left[col_idx.value - 1] = "";
         }
         col_idx.value--;
-      } else if (char === "return") {
+      } else if (char === "⏎") {
         // 入力しきっていない場合はalertを出す
         if (col_idx.value !== LEFT_LEN.value + RIGHT_LEN.value) {
           toast.error("please input all");
@@ -276,8 +276,14 @@ export default defineComponent({
           return;
         }
 
+        can_input.value = false;
+
         // ジャッジする
-        results.value[row_idx.value] = await judge(left, right);
+        const data = await judge(left, right);
+        for (const [i, v] of data.entries()) {
+          results.value[row_idx.value][i] = v;
+          await sleep(0.2);
+        }
 
         // ジャッジ結果をresult_by_valueに代入していく。
         for (let i = 0; i < LEFT_LEN.value; i++) {
@@ -356,10 +362,11 @@ export default defineComponent({
           showModal.value = true;
           row_idx.value = 100;
           can_input.value = false;
+        } else {
+          row_idx.value++;
+          col_idx.value = 0;
+          can_input.value = true;
         }
-
-        row_idx.value++;
-        col_idx.value = 0;
       } else if (col_idx.value > LEFT_LEN.value + RIGHT_LEN.value - 1) {
         // すでに入力しきっているのにさらに入力が来た場合。 なのでスキップ
         return;
@@ -579,8 +586,8 @@ export default defineComponent({
       ></Key>
     </div>
     <div class="special">
-      <Key char="delete" :input="update"></Key>
-      <Key char="return" :input="update"></Key>
+      <Key char="⌫" :input="update"></Key>
+      <Key char="⏎" :input="update"></Key>
     </div>
   </div>
   <Teleport to="body">
@@ -689,20 +696,54 @@ export default defineComponent({
 }
 
 .correct {
-  background-color: rgb(99, 172, 99) !important;
+  animation: 0.4s linear rotation, 0.2s step-end correct-color forwards;
 }
 
 .half {
-  background-color: rgb(211, 211, 101) !important;
+  animation: 0.4s linear rotation, 0.2s step-end half-color forwards;
 }
 
 .notCorrect {
-  background-color: rgb(110, 108, 108) !important;
+  animation: 0.4s linear rotation, 0.2s step-end notCorrect-color forwards;
 }
 
 .current_input {
-  border: 5px solid rgb(40, 40, 40);
+  border: 5px solid #282828;
 }
+
+@keyframes rotation {
+  0% {
+    transform: rotateX(0);
+  }
+  49% {
+    transform: rotateX(90deg);
+  }
+  50% {
+    transform: rotateX(270deg);
+  }
+  100% {
+    transform: rotateX(360deg);
+  }
+}
+
+@keyframes correct-color {
+  to {
+    background-color: rgb(99, 172, 99);
+  }
+}
+
+@keyframes notCorrect-color {
+  to {
+    background-color: rgb(110, 108, 108);
+  }
+}
+
+@keyframes half-color {
+  to {
+    background-color: rgb(211, 211, 101);
+  }
+}
+
 </style>
 
 <style>

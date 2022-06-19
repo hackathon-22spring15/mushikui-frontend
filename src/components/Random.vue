@@ -5,7 +5,7 @@ import ResultModal from "./Modal.vue";
 import apis, { Expression } from "../lib/apis";
 import { transSymbol } from "../utils";
 import { useToast } from "vue-toastification";
-import { useRoute } from 'vue-router';
+import { useRoute } from "vue-router";
 
 const check_finished = (row: Array<number>) => {
   return row.every((e) => e === 2);
@@ -56,11 +56,11 @@ export default defineComponent({
       if (!can_input.value) return;
       switch (e.key) {
         case "Enter":
-          update("return");
+          update("⏎");
           break;
         case "Backspace":
         case "Delete":
-          update("delete");
+          update("⌫");
           break;
         default:
           if (/^[0-9-/\+\*]$/.test(e.key)) {
@@ -190,17 +190,14 @@ export default defineComponent({
 
     const check = async (expr: string) => {
       try {
-        can_input.value = false;
         var expre: Expression = { expression: expr };
         var { data } = await apis.postExpressionRandomExpressionRandomSeedPost(
           seed.value,
           expre
         );
-        can_input.value = true;
         return data.check;
       } catch (e) {
         console.log(e);
-        can_input.value = true;
         return [];
       }
     };
@@ -220,9 +217,12 @@ export default defineComponent({
       }
     };
 
+    const sleep = (second: number) =>
+      new Promise((resolve) => setTimeout(resolve, second * 1000));
+
     // 入力に応じて`lines`を更新して、"enter"が押されたらジャッジをする。
     const update = async (char: string) => {
-      if (char === "delete") {
+      if (char === "⌫") {
         // col_idx.value === 0 な時、まだ何も入力されていないのでスキップ
         if (col_idx.value === 0) {
           return;
@@ -235,7 +235,7 @@ export default defineComponent({
           lines.value[row_idx.value].left[col_idx.value - 1] = "";
         }
         col_idx.value--;
-      } else if (char === "return") {
+      } else if (char === "⏎") {
         // 入力しきっていない場合はalertを出す
         if (col_idx.value !== LEFT_LEN.value + RIGHT_LEN.value) {
           toast.error("please input all");
@@ -253,43 +253,73 @@ export default defineComponent({
           return;
         }
 
+        can_input.value = false;
+
         // ジャッジする
-        results.value[row_idx.value] = await judge(left, right);
+        const data = await judge(left, right);
+        for (const [i, v] of data.entries()) {
+          results.value[row_idx.value][i] = v;
+          await sleep(0.2);
+        }
 
         // ジャッジ結果をresult_by_valueに代入していく。
         for (let i = 0; i < LEFT_LEN.value; i++) {
           const v = lines.value[row_idx.value].left[i];
           if (v === "+") {
-            result_by_value.value[10] = Math.max(result_by_value.value[10], results.value[row_idx.value][i]);
+            result_by_value.value[10] = Math.max(
+              result_by_value.value[10],
+              results.value[row_idx.value][i]
+            );
           } else if (v === "-") {
-            result_by_value.value[11] = Math.max(result_by_value.value[11], results.value[row_idx.value][i]);
+            result_by_value.value[11] = Math.max(
+              result_by_value.value[11],
+              results.value[row_idx.value][i]
+            );
           } else if (v === "*") {
-            result_by_value.value[12] = Math.max(result_by_value.value[12], results.value[row_idx.value][i]);
+            result_by_value.value[12] = Math.max(
+              result_by_value.value[12],
+              results.value[row_idx.value][i]
+            );
           } else if (v === "/") {
-            result_by_value.value[13] = Math.max(result_by_value.value[13], results.value[row_idx.value][i]);
+            result_by_value.value[13] = Math.max(
+              result_by_value.value[13],
+              results.value[row_idx.value][i]
+            );
           } else {
-            result_by_value.value[parseInt(v)] =
-              Math.max(result_by_value.value[parseInt(v)], results.value[row_idx.value][i]);
+            result_by_value.value[parseInt(v)] = Math.max(
+              result_by_value.value[parseInt(v)],
+              results.value[row_idx.value][i]
+            );
           }
         }
 
         for (let i = 0; i < RIGHT_LEN.value; i++) {
           const v = lines.value[row_idx.value].right[i];
           if (v === "+") {
-            result_by_value.value[10] =
-              Math.max(result_by_value.value[10], results.value[row_idx.value][i + LEFT_LEN.value]);
+            result_by_value.value[10] = Math.max(
+              result_by_value.value[10],
+              results.value[row_idx.value][i + LEFT_LEN.value]
+            );
           } else if (v === "-") {
-            result_by_value.value[11] =
-              Math.max(result_by_value.value[11], results.value[row_idx.value][i + LEFT_LEN.value]);
+            result_by_value.value[11] = Math.max(
+              result_by_value.value[11],
+              results.value[row_idx.value][i + LEFT_LEN.value]
+            );
           } else if (v === "*") {
-            result_by_value.value[12] =
-              Math.max(result_by_value.value[12], results.value[row_idx.value][i + LEFT_LEN.value]);
+            result_by_value.value[12] = Math.max(
+              result_by_value.value[12],
+              results.value[row_idx.value][i + LEFT_LEN.value]
+            );
           } else if (v === "/") {
-            result_by_value.value[13] =
-              Math.max(result_by_value.value[13], results.value[row_idx.value][i + LEFT_LEN.value]);
+            result_by_value.value[13] = Math.max(
+              result_by_value.value[13],
+              results.value[row_idx.value][i + LEFT_LEN.value]
+            );
           } else {
-            result_by_value.value[parseInt(v)] =
-              Math.max(result_by_value.value[parseInt(v)], results.value[row_idx.value][i + LEFT_LEN.value]);
+            result_by_value.value[parseInt(v)] = Math.max(
+              result_by_value.value[parseInt(v)],
+              results.value[row_idx.value][i + LEFT_LEN.value]
+            );
           }
         }
 
@@ -299,10 +329,11 @@ export default defineComponent({
           showModal.value = true;
           row_idx.value = 100;
           can_input.value = false;
+        } else {
+          row_idx.value++;
+          col_idx.value = 0;
+          can_input.value = true;
         }
-
-        row_idx.value++;
-        col_idx.value = 0;
       } else if (col_idx.value > LEFT_LEN.value + RIGHT_LEN.value - 1) {
         // すでに入力しきっているのにさらに入力が来た場合。 なのでスキップ
         return;
@@ -512,8 +543,8 @@ export default defineComponent({
       ></Key>
     </div>
     <div class="special">
-      <Key char="delete" :input="update"></Key>
-      <Key char="return" :input="update"></Key>
+      <Key char="⌫" :input="update"></Key>
+      <Key char="⏎" :input="update"></Key>
     </div>
   </div>
   <Teleport to="body">
@@ -623,19 +654,52 @@ export default defineComponent({
 }
 
 .correct {
-  background-color: rgb(99, 172, 99) !important;
+  animation: 0.4s linear rotation, 0.2s step-end correct-color forwards;
 }
 
 .half {
-  background-color: rgb(211, 211, 101) !important;
+  animation: 0.4s linear rotation, 0.2s step-end half-color forwards;
 }
 
 .notCorrect {
-  background-color: rgb(110, 108, 108) !important;
+  animation: 0.4s linear rotation, 0.2s step-end notCorrect-color forwards;
 }
 
 .current_input {
-  border: 5px solid rgb(40, 40, 40);
+  border: 5px solid #282828;
+}
+
+@keyframes rotation {
+  0% {
+    transform: rotateX(0);
+  }
+  49% {
+    transform: rotateX(90deg);
+  }
+  50% {
+    transform: rotateX(270deg);
+  }
+  100% {
+    transform: rotateX(360deg);
+  }
+}
+
+@keyframes correct-color {
+  to {
+    background-color: rgb(99, 172, 99);
+  }
+}
+
+@keyframes notCorrect-color {
+  to {
+    background-color: rgb(110, 108, 108);
+  }
+}
+
+@keyframes half-color {
+  to {
+    background-color: rgb(211, 211, 101);
+  }
 }
 </style>
 

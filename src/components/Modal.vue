@@ -59,12 +59,16 @@ export default defineComponent({
           ShareTextURL = "https://mushikui.trasta.dev/random/" + seed;
           const { data } =
             await apis.getEqualRandomExpressionRandomSeedAnswerGet(seed);
-          answer.value = data.expression.replaceAll("/", "÷").replaceAll("*", "×");
+          answer.value = data.expression
+            .replaceAll("/", "÷")
+            .replaceAll("*", "×");
         } else {
           const { data } = await apis.getEqualDailyExpressionDateAnswerGet(
             seed
           );
-          answer.value = data.expression.replaceAll("/", "÷").replaceAll("*", "×");
+          answer.value = data.expression
+            .replaceAll("/", "÷")
+            .replaceAll("*", "×");
         }
       } catch (e) {
         console.log(e);
@@ -98,28 +102,60 @@ export default defineComponent({
         toast.error("cannot copy");
       }
     };
-    const makesharebody = (equl: Number, resl: Number[][], ent: string) => {
-      ShareTextBody.value = "Mushikui" + ent;
-      let flg = false;
-      console.log(resl);
+    const makesharebody = (
+      equl: Number,
+      resl: Number[][],
+      ent: string,
+      rand: boolean,
+      seed: number
+    ) => {
+      ShareTextBody.value = "Mushikui";
+
+      const seedTxt = seed.toString();
+      const probDate = new Date(
+        parseInt(seedTxt.substring(0, 4)),
+        parseInt(seedTxt.substring(4, 6)) - 1,
+        parseInt(seedTxt.substring(6, 8))
+      );
+      const startData = new Date(2022, 5, 18);
+      const days = Math.floor(
+        (probDate.getTime() - startData.getTime()) / (1000 * 60 * 60 * 24)
+      );
+
+      if (!rand) {
+        ShareTextBody.value += " " + days;
+      }
+
+      let tetorisu = "";
+      let compNum = 0;
+      let flg = true;
       resl.forEach((resl2) => {
         flg = true;
         resl2.forEach((resl3, ind) => {
           if (resl3 === 2) {
-            if (ind === equl) ShareTextBody.value += "=";
-            ShareTextBody.value += "🟩";
+            if (ind === equl) tetorisu += "=";
+            tetorisu += "🟩";
           } else if (resl3 === 1) {
-            if (ind === equl) ShareTextBody.value += "=";
-            ShareTextBody.value += "🟨";
+            if (ind === equl) tetorisu += "=";
+            tetorisu += "🟨";
           } else if (resl3 === 0) {
-            if (ind === equl) ShareTextBody.value += "=";
-            ShareTextBody.value += "⬜";
+            if (ind === equl) tetorisu += "=";
+            tetorisu += "⬜";
           } else {
             flg = false;
           }
         });
-        if (flg) ShareTextBody.value += ent;
+        if (flg) tetorisu += ent;
+        else compNum++;
       });
+      const comp =
+        compNum > 0
+          ? (5-compNum).toString()
+          : resl[4].every((e) => e === 2)
+          ? "5"
+          : "x";
+      ShareTextBody.value += " " + comp + "/5" + ent;
+      ShareTextBody.value += tetorisu;
     };
 
     return {
@@ -157,7 +193,10 @@ export default defineComponent({
               </div>
             </div>
             <div class="second-container">
-              <div class="outer_timer">
+              <div v-if="rand" class="timer">
+                <a class="tonext" href="/random">次の問題</a>
+              </div>
+              <div v-else class="outer_timer">
                 <div>次の問題まで</div>
                 <div class="inner_timer">{{ hours }}:{{ minutes }}:{{ seconds }}</div>
               </div>
@@ -165,7 +204,7 @@ export default defineComponent({
                 src="../assets/copylogo.svg"
                 class="modal-share-button"
                 @click="
-                  makesharebody(equl, resl, '\n');
+                  makesharebody(equl, resl, '\n', rand, seed);
                   copysharebutton();
                 "
               />
@@ -173,7 +212,7 @@ export default defineComponent({
                 src="../assets/twitterlogo.svg"
                 class="modal-share-button"
                 @click="
-                  makesharebody(equl, resl, '%0a');
+                  makesharebody(equl, resl, '%0a', rand, seed);
                   twittersharebutton();
                 "
               />
@@ -206,12 +245,23 @@ export default defineComponent({
   margin: 0 20px;
 }
 
+.timer {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin: auto;
+}
+
 .outer_timer {
   font-size: 1.5rem;
   font-weight: bold;
   margin: auto;
   padding-right: 1ex;
   /* border-right: solid; */
+}
+
+.tonext {
+  text-decoration: none;
+  color: #42b983;
 }
 
 .answer-container {
@@ -264,6 +314,7 @@ export default defineComponent({
   border: 1px;
   background-color: #fff;
   float: right;
+  cursor: pointer;
 }
 
 .modal-share-button {
@@ -271,6 +322,7 @@ export default defineComponent({
   height: 55px;
   float: center;
   margin: auto;
+  cursor: pointer;
 }
 
 .modal-tweet-button {
@@ -278,6 +330,7 @@ export default defineComponent({
   height: 50px;
   float: center;
   margin: auto;
+  cursor: pointer;
 }
 
 /*

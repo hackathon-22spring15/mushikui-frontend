@@ -742,6 +742,9 @@ export default defineComponent({
   }
 }
 
+</style>
+
+<style>
 .Vue-Toastification__toast-body {
   text-align: center !important;
 }

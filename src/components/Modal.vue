@@ -186,10 +186,10 @@ export default defineComponent({
             <div class="answer-container">{{ answer }}</div>
             <div v-if="!rand" class="score-margin">
               <div class="score">
-                win:{{(cookies.get("Win")||0)}}
+                win:{{(parseInt(cookies.get("Win"))||0)}}
               </div>
               <div class="score">
-                lose:{{((cookies.get("Lose"))||0)}}
+                lose:{{((parseInt(cookies.get("Lose")))||0)}}
               </div>
             </div>
             <div class="second-container">
